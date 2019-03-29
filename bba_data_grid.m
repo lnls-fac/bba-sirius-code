@@ -1,4 +1,4 @@
-caminho_arquivos = '/home/alexandre/BBAmatlabMestrado/';
+caminho_arquivos = '../bba-sirius-data/';
 folder = 'grid';
 
 range = 10; % quantidade de valores nas corretoras
@@ -6,7 +6,7 @@ random_error = false; % define se colocaremos erros aleatórios nos BPM's ou nã
 
 for m=1:1 %for m=0:length(machine)
     for recursao=0:0
-        for i=4:4 %for i=1:length(list_bpm)
+        for i=1:1 %for i=1:length(list_bpm)
             
             %escolhe o anel e liga a cavidade de RF e a emissão de radiação
             if(m==0)
@@ -91,7 +91,7 @@ for m=1:1 %for m=0:length(machine)
             data.xBPM = xBPM;
             data.yBPM = yBPM;
             
-            string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+            string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
             save(string,'data');
         end
 

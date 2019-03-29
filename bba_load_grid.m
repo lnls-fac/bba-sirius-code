@@ -1,4 +1,4 @@
-caminho_arquivos = '/home/alexandre/BBAmatlabMestrado/';
+caminho_arquivos = '../bba-sirius-data/';
 folder = 'gridsext';
 
 %configuracoes do arquivo a ser carregado
@@ -33,7 +33,7 @@ for i=1:1
     is_sextupole = isSextupole(family_data,quadru);
     
     %Abre os arquivos das simulações neste bpm
-    string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
     load(string);
     
     %Seta a escala dos dados (um)

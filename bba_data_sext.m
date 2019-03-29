@@ -1,4 +1,4 @@
-caminho_arquivos = '/home/alexandre/BBAmatlabMestrado/';
+caminho_arquivos = '../bba-sirius-data/';
 folder = 'sext';
 
 range = 10; % quantidade de valores nas corretoras
@@ -43,7 +43,7 @@ for m=0:1 %for m=0:length(machine)
                 BBAresultX = BBAscan_sext(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error,is_sextupole);
                 BBAresultY = BBAscan_sext(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error,is_sextupole);
             else
-                string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao-1) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+                string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao-1) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
                 load(string);
                 ring = data.ring;
                 kick = data.kickMin(1);
@@ -92,7 +92,7 @@ for m=0:1 %for m=0:length(machine)
             %dados do Kresult
             data.Kresult = Kresult;
             
-            string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+            string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
             save(string,'data');
 
             kicks(1,:) = BBAresultX.kicks;

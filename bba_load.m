@@ -1,4 +1,4 @@
-caminho_arquivos = '/home/alexandre/BBAmatlabMestrado/';
+caminho_arquivos = '../bba-sirius-data/';
 folder = 'plusK';
 
 %configuracoes do arquivo a ser carregado
@@ -101,7 +101,7 @@ for i=1:length(alist_bpm)
     is_sextupole = isSextupole(family_data,quadru);
     
     %Abre os arquivos das simulações neste bpm
-    string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
     load(string);
     string = [caminho_arquivos 'graphics/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'kicks.mat'];
     load(string,'kicks');
@@ -148,8 +148,9 @@ for i=1:length(alist_bpm)
 	list_quadru{index} = [list_quadru{index}; quadru];
     functionMin{index} = [functionMin{index}; data.functionMin];
     
-	%list_desv{index} = [list_desv{index}; [data.centerQuadru(1) - pot*ring{quadru}.T2(1) data.centerQuadru(2) - pot*ring{quadru}.T2(3)]];
-    list_desv{index} = [list_desv{index}; [data.centerBPM(1) - pot*ring{quadru}.T2(1) data.centerBPM(2) - pot*ring{quadru}.T2(3)]];
+	list_desv{index} = [list_desv{index}; [data.centerQuadru(1) - pot*ring{quadru}.T2(1) data.centerQuadru(2) - pot*ring{quadru}.T2(3)]];
+    %Mudança para o relatório em list_desv
+    %list_desv{index} = [list_desv{index}; [data.centerBPM(1) - pot*ring{quadru}.T2(1) data.centerBPM(2) - pot*ring{quadru}.T2(3)]];
 	list_aux{index} = [list_aux{index}; [data.centerQuadruPosPerp(1) - pot*ring{quadru}.T2(3) data.centerQuadruPosPerp(2) - pot*ring{quadru}.T2(1)]];
     
 	desvbpm{index} = [desvbpm{index}; data.centerBPM - data.centerQuadru];
@@ -199,7 +200,7 @@ for i=1:length(alist_bpm)
         end
         %fprintf('%d -- %d\n', index, D);
         %fprintf('%d -- %d\n', index, L);
-        fprintf('%d -- %d   %d\n', index, x0l, y0l);
+        %fprintf('%d -- %d   %d\n', index, x0l, y0l);
         x0l = 0; %Não corrige erro do angulo
         y0l = 0; %Não corrige erro do angulo
         Gx = ring{quadru}.PolynomA(1);
@@ -332,7 +333,7 @@ for i=1:length(alist_bpm)
     is_sextupole = isSextupole(family_data,quadru);
     
     %Abre os arquivos das simulações neste bpm
-    string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
     load(string);
     
     %Seta a escola dos dados (um)
@@ -387,6 +388,7 @@ for i=1:3
     plot(graf6,cQuadruy{i},dervY{i},l(i,:));
 end
 
+%{
 figure;
 ax = subplot(1,1,1);
 hold(ax,'on')
@@ -411,3 +413,4 @@ for i = 1:3
     %fprintf('%d\n', med);
 end
 legend(ax,{'Quadrupolo','QS','Sextupolo + QS'});
+%}

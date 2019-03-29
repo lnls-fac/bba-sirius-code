@@ -1,11 +1,11 @@
-caminho_arquivos = '/home/alexandre/BBAmatlabMestrado/';
+caminho_arquivos = '../bba-sirius-data/';
 folder = 'plusK';
 
 range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 
 for m=1:1 %for m=0:length(machine)
-    for recursao=1:1
+    for recursao=0:0
         for i=1:length(list_bpm) %for i=1:length(list_bpm)
             
             %escolhe o anel e liga a cavidade de RF e a emissão de radiação
@@ -34,7 +34,6 @@ for m=1:1 %for m=0:length(machine)
             %OBS: Tudo isso pode ser calculado só uma vez e criar uma
             %tabela posteriormente, sendo necessário apenas ler a tabela e
             %não ficar repetindo as contas
-            
             DeltaK = [DeltaKaux(1)*DeltaKaux(2)/(DeltaKaux(1) + DeltaKaux(2)) DeltaKaux(1)*DeltaKaux(2)/(DeltaKaux(1) + DeltaKaux(2))];
             %OBS: para a função de mérito que soma x^2 e y^2, DeltaK é a
             %média harmônica dos dois DeltaK calculados anteriormente
@@ -43,7 +42,7 @@ for m=1:1 %for m=0:length(machine)
                 BBAresultX = BBAscan(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error);
                 BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
             else
-                string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao-1) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+                string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao-1) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
                 load(string);
                 ring = data.ring;
                 kick = data.kickMin(1);
@@ -56,18 +55,15 @@ for m=1:1 %for m=0:length(machine)
             ringAux = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + BBAresultX.kickMin, corrs(1), 'x');
             Kresult = Kscan(ringAux,family_data,quadru,bpm,is_skew,range,4*DeltaK(1),random_error);
             
-            %fprintf('Índice do BPM: %d\n', bpm);
+            fprintf('Índice do BPM: %d\n', bpm);
             fprintf('Índice do Quadrupolo mais perto: %d\n', quadru);
             %fprintf('Índice da Corretora Horizontal: %d\n', corrs(1));
             %fprintf('Índice da Corretora Vertical: %d\n', corrs(2));
             fprintf('É Skew: %d\n', is_skew);
             fprintf('É Sextupolo: %d\n', is_sextupole);
-            fprintf('Kicks: %d %d\n', kicksMax(1), kicksMax(2));
-            fprintf('DeltaK: %d %d\n', DeltaK(1), DeltaK(2));
-            fprintf('CENTRO DO QUADRUPOLO:\n');
-            fprintf('Valor Real: (%d , %d)\n', ring{quadru}.T2(1), ring{quadru}.T2(3));
-            fprintf('Leitura no Quadrupolo: (%d , %d)\n', BBAresultX.centerQuadruMin, BBAresultY.centerQuadruMin);
-            fprintf('Leitura do BPM: (%d , %d)\n', BBAresultX.centerBPMMin, BBAresultY.centerBPMMin);
+            %fprintf('Kicks: %d %d\n', kicksMax(1), kicksMax(2));
+            %fprintf('DeltaK: %d %d\n', DeltaK(1), DeltaK(2));
+            fprintf('CENTRO DO QUADRUPOLO: (%d , %d)\n', ring{quadru}.T2(1), ring{quadru}.T2(3));
             fprintf('--------------------\n');
 
             data = [];
@@ -78,6 +74,12 @@ for m=1:1 %for m=0:length(machine)
             %anel final após a recursao
             data.ring = ring;
             %dados o BBAresult
+            data.BBAresultX = BBAresultX;
+            data.BBAresultY = BBAresultY;
+            %dados do Kresult
+            data.Kresult = Kresult;
+            %--------
+            %{
             data.kickMin = [BBAresultX.kickMin BBAresultY.kickMin];
             data.functionMin = [BBAresultX.functionMin BBAresultY.functionMin];
             data.centerQuadru = [BBAresultX.centerQuadruMin BBAresultY.centerQuadruMin];
@@ -89,21 +91,10 @@ for m=1:1 %for m=0:length(machine)
             data.angQuadruInicio = [BBAresultX.angQuadruInicio BBAresultY.angQuadruInicio];
             data.desvEnerg = [BBAresultX.desvEnerg BBAresultY.desvEnerg];
             data.centerQuadruPosPerp = [BBAresultX.centerQuadruPosPerp BBAresultY.centerQuadruPosPerp];
-            %dados do Kresult
-            data.Kresult = Kresult;
+            %}
             
-            string = [caminho_arquivos 'data/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+            string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
             save(string,'data');
-
-            kicks(1,:) = BBAresultX.kicks;
-            kicks(2,:) = BBAresultY.kicks;
-            meritfunction(1,:) = BBAresultX.meritfunction;
-            meritfunction(2,:) = BBAresultY.meritfunction;
-            
-            string = [caminho_arquivos 'graphics/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'kicks.mat'];
-            save(string,'kicks');
-            string = [caminho_arquivos 'graphics/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'meritfunction.mat'];
-            save(string,'meritfunction');
         end
 
     end

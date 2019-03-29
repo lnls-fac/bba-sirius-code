@@ -5,8 +5,9 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
     ringDelta = setRingDelta(ring,ind,DeltaK,is_skew);
     kicks = [];
     meritfunction = [];
-    centerQuadru = [];
-    centerBPM = [];
+    posQuadru = [];
+    posQuadruFinal = [];
+    posBPM = [];
     errorRandomMax = 100/(10^9); %100nm é o erro aleatório esperado dos BPM's
     
     %faz a varredura na corretora e realiza o BBA
@@ -35,22 +36,25 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
         %Obtém variáveis internas da simulação para analisar o BBA
         %E a medida do BPM próximo ao Quadrupolo
         orbitTemp = findorbit6(ringTemp,1:length(ringTemp));
-        if(dir == 'x')
-            pos = findCenter(ringTemp,orbitTemp,ind);
-            centerQuadru = [centerQuadru, pos(1)];
-            pos = findCenter(ringTemp,orbitTemp,bpm);
-            centerBPM = [centerBPM, pos(1)];
-        end
-        if(dir == 'y')
-            pos = findCenter(ringTemp,orbitTemp,ind);
-            centerQuadru = [centerQuadru, pos(3)];
-            pos = findCenter(ringTemp,orbitTemp,bpm);
-            centerBPM = [centerBPM, pos(3)];
-        end
+        pos = findCenter(ringTemp,orbitTemp,ind);
+        posQuadru = [posQuadru, pos];
+        pos = findCenter(ringTemp,orbitTemp,bpm);
+        posBPM = [posBPM, pos];
+        pos = findFinal(ringTemp,orbitTemp,ind);
+        posQuadruFinal = [posQuadruFinal, pos];
     end
     
     %figure; plot(kicks,sqrt(meritfunction));
     
+    BBAresult = [];
+    BBAresult.kicks = kicks;
+    BBAresult.meritfunction = meritfunction;
+    BBAresult.posQuadru = posQuadru;
+    BBAresult.posBPM = posBPM;
+    BBAresult.posQuadruFinal = posQuadruFinal;
+    BBAresult.BBAdir = dir;
+    
+    %{
     %Obtém os valores que minimizam a função de mérito
     %Utilizando Interpolação Spline
     %OBS: Regressão linear assumindo uma parábola não funcionou muito bem
@@ -111,5 +115,7 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
     BBAresult.desvEnerg = desvEnerg;
     BBAresult.kicks = kicks;
     BBAresult.meritfunction = meritfunction;
+    
+    %}
 end
 
