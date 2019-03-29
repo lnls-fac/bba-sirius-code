@@ -15,7 +15,7 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
         ringTemp = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corr,dir) + n*step_kick, corr, dir);
         ringDeltaTemp = lnls_set_kickangle(ringDelta, lnls_get_kickangle(ringDelta,corr,dir) + n*step_kick, corr, dir);
         kicks = [kicks; n*step_kick];
-        orbitTemp = findorbit6(ringTemp,family_data.BPM.ATIndex);
+        orbitTemp = findorbit6(ringTemp,1:length(ringTemp));
         orbitDeltaTemp = findorbit6(ringDeltaTemp,family_data.BPM.ATIndex);
         f = 0;
         for i = 1:length(family_data.BPM.ATIndex)
@@ -27,15 +27,14 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
                 r1 = 0;
                 r2 = 0;
             end
-            dx = (orbitDeltaTemp(1,i) - orbitTemp(1,i)) + errorRandomMax*r1;
-            dy = (orbitDeltaTemp(3,i) - orbitTemp(3,i)) + errorRandomMax*r2;
+            dx = (orbitDeltaTemp(1,i) - orbitTemp(1,family_data.BPM.ATIndex(i))) + errorRandomMax*r1;
+            dy = (orbitDeltaTemp(3,i) - orbitTemp(3,family_data.BPM.ATIndex(i))) + errorRandomMax*r2;
             f = f + dx*dx + dy*dy;
         end
         f = f/length(family_data.BPM.ATIndex);
         meritfunction = [meritfunction, f];
         %Obtém variáveis internas da simulação para analisar o BBA
         %E a medida do BPM próximo ao Quadrupolo
-        orbitTemp = findorbit6(ringTemp,1:length(ringTemp));
         pos = findCenter(ringTemp,orbitTemp,ind);
         posQuadru = [posQuadru, pos];
         pos = findCenter(ringTemp,orbitTemp,bpm);
@@ -54,7 +53,7 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
     BBAresult.posQuadruFinal = posQuadruFinal;
     BBAresult.BBAdir = dir;
     
-    %{
+%{
     %Obtém os valores que minimizam a função de mérito
     %Utilizando Interpolação Spline
     %OBS: Regressão linear assumindo uma parábola não funcionou muito bem
