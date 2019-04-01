@@ -2,12 +2,13 @@ caminho_arquivos = '../bba-sirius-data/';
 folder = 'plusK';
 
 %configuracoes do arquivo a ser carregado
+m = 1;
 range = 10;
 random_error = false;
-m = 1;
-recursao = 1;
+recursao = 0;
 
-corrigir = true; %configura se usará as expressões teóricas de correção
+pot = 1e6; % seta a escola dos dados (um)
+corrigir = false; % configura se usará as expressões teóricas de correção
 
 %carrega o anel correspondente
 if(m==0)
@@ -17,24 +18,27 @@ else
 end
 
 %seta o formato dos pontos e cores nos gráficos
+l2 = ['b'; 'r'; 'k'];
 l = ['bo'; 'rs'; 'k*'];
 
 %inicializa as variáveis necessárias
+text_bpm = {};
+text_quadru = {};
 list_bpm = {};
 list_quadru = {};
-functionMin = {};
 
-list_aux = {};
-list_desv = {};
+kicksX = {};
+kicksY = {};
+meritfunctionX = {};
+meritfunctionY = {};
 
-desvbpm = {};
-ang = {};
+functionMinX = {};
+functionMinY = {};
 
-desvInt = {};
-angInt = {};
-
-desvReto = {};
-angReto = {};
+desvQuadruX = {};
+desvQuadruY = {};
+desvBPMX = {};
+desvBPMY = {};
 
 correcao1x = {};
 correcao2x = {};
@@ -43,25 +47,24 @@ correcao2y = {};
 correcao3x = {};
 correcao3y = {};
 
-text_bpm = {};
-text_quadru = {};
-
 for i=1:3
+    text_bpm{i} = [];
+    text_quadru{i} = [];
     list_bpm{i} = [];
     list_quadru{i} = [];
-    functionMin{i} = [];
     
-    list_desv{i} = [];
-    list_aux{i} = [];
+    kicksX{i} = [];
+    kicksY{i} = [];
+    meritfunctionX{i} = [];
+    meritfunctionY{i} = [];
     
-    desvbpm{i} = [];
-    ang{i} = [];
+    functionMinX{i} = [];
+    functionMinY{i} = [];
     
-    desvInt{i} = [];
-    angInt{i} = [];
-    
-    desvReto{i} = [];
-    angReto{i} = [];
+    desvQuadruX{i} = [];
+    desvQuadruY{i} = [];
+    desvBPMX{i} = [];
+    desvBPMY{i} = [];
     
     correcao1x{i} = [];
     correcao2x{i} = [];
@@ -69,29 +72,7 @@ for i=1:3
     correcao2y{i} = [];
     correcao3x{i} = [];
     correcao3y{i} = [];
-    
-    text_bpm{i} = [];
-    text_quadru{i} = [];
 end
-
-%cria os espaços para os gráficos da primeira figura
-figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Desvios']);
-ax1 = subplot(2,2,1);
-ax2 = subplot(2,2,2);
-ax3 = subplot(2,2,3);
-ax4 = subplot(2,2,4);
-hold(ax1,'on');
-hold(ax2,'on');
-hold(ax3,'on');
-hold(ax4,'on');
-xlabel(ax1,'Kick da Corretora Horizontal (urad)');
-ylabel(ax1,'Desvio H-blue/ V-red/black (um)');
-xlabel(ax2,'Kick da Corretora Vertical (urad)');
-ylabel(ax2,'Desvio H-blue/ V-red/black (um)');
-xlabel(ax3,'Posicao do Quadru (m)');
-ylabel(ax3,'Desvio BBA Horizontal (um)');
-xlabel(ax4,'Posicao do Quadru (m)');
-ylabel(ax4,'Desvio BBA Vertical (um)');
 
 %for i=1:length(alist_bpm)
 for i=1:length(alist_bpm)
@@ -103,31 +84,6 @@ for i=1:length(alist_bpm)
     %Abre os arquivos das simulações neste bpm
     string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
     load(string);
-    string = [caminho_arquivos 'graphics/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'kicks.mat'];
-    load(string,'kicks');
-    string = [caminho_arquivos 'graphics/' folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'meritfunction.mat'];
-    load(string,'meritfunction');
-    
-    %Seta a escola dos dados (um)
-	pot = 1e6;
-    kicks = pot*kicks;
-    meritfunction = pot*pot*meritfunction;
-    data.bpm = bpm;
-    data.quadru = quadru;
-	data.corrs = data.corrs;
-	data.recursao = data.recursao;
-	data.kickMin = pot*data.kickMin;
-	data.functionMin = pot*pot*data.functionMin;
-	data.centerQuadru = pot*data.centerQuadru;
-	data.centerBPM = pot*data.centerBPM;
-	data.angQuadru = pot*data.angQuadru;
-	data.posQuadruFinal = pot*data.posQuadruFinal;
-	data.angQuadruFinal = pot*data.angQuadruFinal;
-    data.posQuadruInicio = pot*data.posQuadruInicio;
-	data.angQuadruInicio = pot*data.angQuadruInicio;
-	data.desvEnerg = pot*data.desvEnerg;
-	data.centerQuadruPosPerp = pot*data.centerQuadruPosPerp;
-    
     
     %Escolhe o indice correto para cada quadrupolo
     index = 1;
@@ -138,69 +94,49 @@ for i=1:length(alist_bpm)
         end
     end
     
-    %Ordem de 100-300
-    %fprintf('%d -- %d\n', index, data.desvEnerg(1));
-    
     text_bpm{index} = [text_bpm{index}; bpm];
     text_quadru{index} = [text_quadru{index}; quadru];
-    
 	list_bpm{index} = [list_bpm{index}; bpm];
 	list_quadru{index} = [list_quadru{index}; quadru];
-    functionMin{index} = [functionMin{index}; data.functionMin];
     
-	list_desv{index} = [list_desv{index}; [data.centerQuadru(1) - pot*ring{quadru}.T2(1) data.centerQuadru(2) - pot*ring{quadru}.T2(3)]];
-    %Mudança para o relatório em list_desv
-    %list_desv{index} = [list_desv{index}; [data.centerBPM(1) - pot*ring{quadru}.T2(1) data.centerBPM(2) - pot*ring{quadru}.T2(3)]];
-	list_aux{index} = [list_aux{index}; [data.centerQuadruPosPerp(1) - pot*ring{quadru}.T2(3) data.centerQuadruPosPerp(2) - pot*ring{quadru}.T2(1)]];
+    BBAresult = data.BBAresultX;
+    BBAresult.kicks = BBAresult.kicks*pot;
+    BBAresult.meritfunction = BBAresult.meritfunction*pot*pot;
+    kicksX{index} = [kicksX{index}, BBAresult.kicks];
+    meritfunctionX{index} = [meritfunctionX{index}, BBAresult.meritfunction];
     
-	desvbpm{index} = [desvbpm{index}; data.centerBPM - data.centerQuadru];
-    ang{index} = [ang{index}; data.angQuadru];
+    BBAresult = data.BBAresultY;
+    BBAresult.kicks = BBAresult.kicks*pot;
+    BBAresult.meritfunction = BBAresult.meritfunction*pot*pot;
+    kicksY{index} = [kicksY{index}, BBAresult.kicks];
+    meritfunctionY{index} = [meritfunctionY{index}, BBAresult.meritfunction];
     
-    %Faz as contas corretas dependendo se o BPM está antes ou depois do
-    %Quadrupolo
-    if(bpm > quadru)
-        desvInt{index} = [desvInt{index}; data.posQuadruFinal - data.centerQuadru];
-        angInt{index} = [angInt{index}; data.angQuadru];
-        
-        desvReto{index} = [desvReto{index}; data.centerBPM - data.posQuadruFinal];
-        angReto{index} = [angReto{index}; data.angQuadruFinal];
-    else
-        desvInt{index} = [desvInt{index}; data.centerQuadru - data.posQuadruInicio];
-        angInt{index} = [angInt{index}; data.angQuadruInicio];
-        
-        desvReto{index} = [desvReto{index}; data.posQuadruInicio - data.centerBPM];
-        angReto{index} = [angReto{index}; data.angQuadruInicio];
-    end
+    functionMin = data.BBAanalyseX.functionMin*pot*pot;
+    functionMinX{index} = [functionMinX{index}; functionMin];
+    functionMin = data.BBAanalyseY.functionMin*pot*pot;
+    functionMinY{index} = [functionMinY{index}; functionMin];
     
-    %Plota os gráficos das funções de mérito
-    if(is_skew == true)
-        if(is_sextupole == true)
-            plot(ax1,kicks(1,:),sqrt(meritfunction(1,:)),'k');
-            plot(ax2,kicks(2,:),sqrt(meritfunction(2,:)),'k');
-        else
-           plot(ax1,kicks(1,:),sqrt(meritfunction(1,:)),'r');
-           plot(ax2,kicks(2,:),sqrt(meritfunction(2,:)),'r');
-        end
-    else
-        plot(ax1,kicks(1,:),sqrt(meritfunction(1,:)),'b');
-        plot(ax2,kicks(2,:),sqrt(meritfunction(2,:)),'b');
-    end
+    posCenterQuadru = [pot*ring{quadru}.T2(1); pot*ring{quadru}.T2(2); pot*ring{quadru}.T2(3); pot*ring{quadru}.T2(4); 0; 0];
+    
+    posQuadruMin = data.BBAanalyseX.posQuadruMin*pot;
+    posBPMMin = data.BBAanalyseX.posBPMMin*pot;
+    desvQuadruX{index} = [desvQuadruX{index}, posQuadruMin - posCenterQuadru];
+    desvBPMX{index} = [desvBPMX{index}, posBPMMin - posCenterQuadru];
+    posQuadruMin = data.BBAanalyseY.posQuadruMin*pot;
+    posBPMMin = data.BBAanalyseY.posBPMMin*pot;
+    desvQuadruY{index} = [desvQuadruY{index}, posQuadruMin - posCenterQuadru];
+    desvBPMY{index} = [desvBPMY{index}, posBPMMin - posCenterQuadru];
     
     %Calcula as expressões teóricas de correção
     if(corrigir == true)
         L = the_ring{quadru}.Length;
         if(bpm > quadru)
             D = findsposOff(the_ring,bpm) - findsposOff(the_ring,quadru) - L;
-            x0l = data.angQuadru(1);
-            y0l = data.angQuadru(2);
         else
             D = findsposOff(the_ring,quadru) - findsposOff(the_ring,bpm);
-            x0l = data.angQuadru(1);
-            y0l = data.angQuadru(2);
         end
-        %fprintf('%d -- %d\n', index, D);
-        %fprintf('%d -- %d\n', index, L);
-        %fprintf('%d -- %d   %d\n', index, x0l, y0l);
+        %x0l = data.BBAanalyseX.posQuadruMin(2)*pot;
+        %y0l = data.BBAanalyseX.posQuadruMin(4)*pot;
         x0l = 0; %Não corrige erro do angulo
         y0l = 0; %Não corrige erro do angulo
         Gx = ring{quadru}.PolynomA(1);
@@ -216,34 +152,63 @@ for i=1:length(alist_bpm)
             x0 = (Gy/K)*(1 - (L*sqrt(-K))/(exp(L*sqrt(-K)/2)-exp(-L*sqrt(-K)/2)));
             y0 = (Gx/K)*(1 - (L*sqrt(-K)/2)/(sin(L*sqrt(-K)/2)));
         end
-        correcao1x{index} = [correcao1x{index}; pot*x0];
-        correcao1y{index} = [correcao1y{index}; pot*y0];
-        correcao2x{index} = [correcao2x{index}; pot*((1/8)*(-Gy)*L*L + (1/8)*x0*(-K)*L*L + (Gy*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(x0l*L/2)*(1 + (-K)*L*L/24)];
-        correcao2y{index} = [correcao2y{index}; pot*((1/8)*(Gx)*L*L + (1/8)*y0*(K)*L*L + (Gx*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(y0l*L/2)*(1 + (K)*L*L/24)];
-        correcao3x{index} = [correcao3x{index}; pot*(D/2)*((-Gy)*L + x0*(-K)*L + ((-Gy)*L*L)*((-K)*L)/24) + sign(bpm-quadru)*x0l*D*(1 + (-K)*L*L/8)];
-        correcao3y{index} = [correcao3y{index}; pot*(D/2)*((Gx)*L + y0*(K)*L + ((Gx)*L*L)*((K)*L)/24) + sign(bpm-quadru)*y0l*D*(1 + (K)*L*L/8)];
+        correcao1x{index} = [correcao1x{index}, pot*x0];
+        correcao1y{index} = [correcao1y{index}, pot*y0];
+        correcao2x{index} = [correcao2x{index}, pot*((1/8)*(-Gy)*L*L + (1/8)*x0*(-K)*L*L + (Gy*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(x0l*L/2)*(1 + (-K)*L*L/24)];
+        correcao2y{index} = [correcao2y{index}, pot*((1/8)*(Gx)*L*L + (1/8)*y0*(K)*L*L + (Gx*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(y0l*L/2)*(1 + (K)*L*L/24)];
+        correcao3x{index} = [correcao3x{index}, pot*(D/2)*((-Gy)*L + x0*(-K)*L + ((-Gy)*L*L)*((-K)*L)/24) + sign(bpm-quadru)*x0l*D*(1 + (-K)*L*L/8)];
+        correcao3y{index} = [correcao3y{index}, pot*(D/2)*((Gx)*L + y0*(K)*L + ((Gx)*L*L)*((K)*L)/24) + sign(bpm-quadru)*y0l*D*(1 + (K)*L*L/8)];
     else
-        correcao1x{index} = [correcao1x{index}; 0];
-        correcao1y{index} = [correcao1y{index}; 0];
-        correcao2x{index} = [correcao2x{index}; 0];
-        correcao2y{index} = [correcao2y{index}; 0];
-        correcao3x{index} = [correcao3x{index}; 0];
-        correcao3y{index} = [correcao3y{index}; 0];
+        correcao1x{index} = [correcao1x{index}, 0];
+        correcao1y{index} = [correcao1y{index}, 0];
+        correcao2x{index} = [correcao2x{index}, 0];
+        correcao2y{index} = [correcao2y{index}, 0];
+        correcao3x{index} = [correcao3x{index}, 0];
+        correcao3y{index} = [correcao3y{index}, 0];
     end
 
 end
 
-%Plota os gráficos de mínimos das funções de mérito
+%cria os espaços para os gráficos da primeira figura
+size_num = 20;
+figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Desvios']);
+ax1 = subplot(2,2,1);
+ax2 = subplot(2,2,2);
+ax3 = subplot(2,2,3);
+ax4 = subplot(2,2,4);
+ax1.FontSize = size_num;
+ax2.FontSize = size_num;
+ax3.FontSize = size_num;
+ax4.FontSize = size_num;
+hold(ax1,'on');
+hold(ax2,'on');
+hold(ax3,'on');
+hold(ax4,'on');
+xlabel(ax1,'Kick Horizontal (urad)','FontSize',size_num);
+ylabel(ax1,'Distorção de órbita (um^2)','FontSize',size_num);
+xlabel(ax2,'Kick Vertical (urad)','FontSize',size_num);
+ylabel(ax2,'Distorção de órbita (um^2)','FontSize',size_num);
+xlabel(ax3,'Posicao do Quadru (m)','FontSize',size_num);
+ylabel(ax3,'Desvio Mínimo - Horz (um^2)','FontSize',size_num);
+xlabel(ax4,'Posicao do Quadru (m)','FontSize',size_num);
+ylabel(ax4,'Desvio Mínimo - Vert (um^2)','FontSize',size_num);
 for i=1:3
-    plot(ax3,findsposOff(ring,list_quadru{i}),functionMin{i}(:,1),[l(i,:) '-']);
-    plot(ax4,findsposOff(ring,list_quadru{i}),functionMin{i}(:,2),[l(i,:) '-']);
+    width_line = 2;
+    plot(ax1,kicksX{i},meritfunctionX{i},l2(i,:), 'linewidth', width_line);
+    plot(ax2,kicksY{i},meritfunctionY{i},l2(i,:), 'linewidth', width_line);
+    plot(ax3,findsposOff(ring,list_quadru{i}),functionMinX{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(ax4,findsposOff(ring,list_quadru{i}),functionMinY{i},[l(i,:) '-'], 'linewidth', width_line);
 end
+%legend(ax1,{'Quadrupolo','QS','Sextupolo + QS'});
+%legend(ax2,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(ax3,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(ax4,{'Quadrupolo','QS','Sextupolo + QS'});
 
 %Cria os espaços para os gráficos na segunda figura
 if(corrigir == true)
-    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise 1 Corrigido']);
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaX Corrigido']);
 else
-    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise 1']);
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaX']);
 end
 gr1x = subplot(2,3,1);
 gr2x = subplot(2,3,2);
@@ -251,37 +216,105 @@ gr3x = subplot(2,3,3);
 gr1y = subplot(2,3,4);
 gr2y = subplot(2,3,5);
 gr3y = subplot(2,3,6);
+gr1x.FontSize = size_num;
+gr2x.FontSize = size_num;
+gr3x.FontSize = size_num;
+gr1y.FontSize = size_num;
+gr2y.FontSize = size_num;
+gr3y.FontSize = size_num;
 hold(gr1x,'on');
 hold(gr2x,'on');
 hold(gr3x,'on');
 hold(gr1y,'on');
 hold(gr2y,'on');
 hold(gr3y,'on');
-xlabel(gr1x,'posicao do Quadru (m)');
-ylabel(gr1x,'X: Dif Quadru e Real (um)');
-xlabel(gr2x,'Dist Y no Quadru do Centro (um)');
-ylabel(gr2x,'X: Dif Quadru e Real (um)');
-xlabel(gr3x,'X: Angulo no Quadru (urad)');
-ylabel(gr3x,'X: Dif BPM e Quadru (um)');
-xlabel(gr1y,'posicao do BPM (m)');
-ylabel(gr1y,'Y: Dif Quadru e Real (um)');
-xlabel(gr2y,'Dist X no Quadru do Centro (um)');
-ylabel(gr2y,'Y: Dif Quadru e Real (um)');
-xlabel(gr3y,'Y: Angulo no Quadru (urad)');
-ylabel(gr3y,'Y: Dif BPM e Quadru (um)');
-
-%Plota os gráficos da segunda figura
+xlabel(gr1x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr1x,'X: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2x,'x Feixe-CM (um)','FontSize',size_num);
+ylabel(gr2x,'y Feixe-CM (um)','FontSize',size_num);
+xlabel(gr3x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3x,'X: Dist BPM e CM (um)','FontSize',size_num);
+xlabel(gr1y,'posicao - s (m)');
+ylabel(gr1y,'Y: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2y,'x BPM-CM (um)','FontSize',size_num);
+ylabel(gr2y,'y BPM-CM  (um)','FontSize',size_num);
+xlabel(gr3y,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3y,'Y: Dist BPM e CM (um)','FontSize',size_num);
 for i=1:3
-    plot(gr1x,findsposOff(ring,list_quadru{i}),list_desv{i}(:,1) - correcao1x{i},[l(i,:) '-']);
-    plot(gr2x,list_aux{i}(:,1),list_desv{i}(:,1) - correcao1x{i},l(i,:));
-    plot(gr3x,ang{i}(:,1),desvbpm{i}(:,1) - correcao2x{i} - correcao3x{i},l(i,:));
+    width_line = 2;
+    plot(gr1x,findsposOff(ring,list_quadru{i}),desvQuadruX{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2x,desvQuadruX{i}(1,:) - correcao1x{i},desvQuadruX{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,list_quadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},[l(i,:) '-'], 'linewidth', width_line);
     
-    plot(gr1y,findsposOff(ring,list_quadru{i}),list_desv{i}(:,2) - correcao1y{i},[l(i,:) '-']);
-    plot(gr2y,list_aux{i}(:,2),list_desv{i}(:,2) - correcao1y{i},l(i,:));
-    plot(gr3y,ang{i}(:,2),desvbpm{i}(:,2) - correcao2y{i} - correcao3y{i},l(i,:));
-    %text(ang{i}(:,2),desvbpm{i}(:,2) - correcao2y{i} - correcao3y{i},int2str(text_bpm{1}));
-    %text(ang{i}(:,2),desvbpm{i}(:,2) - correcao2y{i} - correcao3y{i},int2str(text_quadru{1}));
+    plot(gr1y,findsposOff(ring,list_quadru{i}),desvQuadruX{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,list_quadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},[l(i,:) '-'], 'linewidth', width_line);
+    %text(findsposOff(ring,list_quadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
+    %text(findsposOff(ring,list_quadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
 end
+legend(gr1x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+
+%Cria os espaços para os gráficos na terceira figura
+if(corrigir == true)
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaY Corrigido']);
+else
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaY']);
+end
+gr1x = subplot(2,3,1);
+gr2x = subplot(2,3,2);
+gr3x = subplot(2,3,3);
+gr1y = subplot(2,3,4);
+gr2y = subplot(2,3,5);
+gr3y = subplot(2,3,6);
+gr1x.FontSize = size_num;
+gr2x.FontSize = size_num;
+gr3x.FontSize = size_num;
+gr1y.FontSize = size_num;
+gr2y.FontSize = size_num;
+gr3y.FontSize = size_num;
+hold(gr1x,'on');
+hold(gr2x,'on');
+hold(gr3x,'on');
+hold(gr1y,'on');
+hold(gr2y,'on');
+hold(gr3y,'on');
+xlabel(gr1x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr1x,'X: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2x,'x Feixe-CM (um)','FontSize',size_num);
+ylabel(gr2x,'y Feixe-CM (um)','FontSize',size_num);
+xlabel(gr3x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3x,'X: Dist BPM e CM (um)','FontSize',size_num);
+xlabel(gr1y,'posicao - s (m)');
+ylabel(gr1y,'Y: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2y,'x BPM-CM (um)','FontSize',size_num);
+ylabel(gr2y,'y BPM-CM  (um)','FontSize',size_num);
+xlabel(gr3y,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3y,'Y: Dist BPM e CM (um)','FontSize',size_num);
+for i=1:3
+    width_line = 2;
+    plot(gr1x,findsposOff(ring,list_quadru{i}),desvQuadruY{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2x,desvQuadruY{i}(1,:) - correcao1x{i},desvQuadruY{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,list_quadru{i}),desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},[l(i,:) '-'], 'linewidth', width_line);
+    
+    plot(gr1y,findsposOff(ring,list_quadru{i}),desvQuadruY{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,list_quadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},[l(i,:) '-'], 'linewidth', width_line);
+    %text(findsposOff(ring,list_quadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
+    %text(findsposOff(ring,list_quadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
+end
+legend(gr1x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+
+%{
 
 %cria os espaços para os gráficos da terceira figura
 figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Kscan']);
@@ -413,4 +446,6 @@ for i = 1:3
     %fprintf('%d\n', med);
 end
 legend(ax,{'Quadrupolo','QS','Sextupolo + QS'});
+%}
+
 %}

@@ -32,7 +32,7 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
             f = f + dx*dx + dy*dy;
         end
         f = f/length(family_data.BPM.ATIndex);
-        meritfunction = [meritfunction, f];
+        meritfunction = [meritfunction; f];
         %Obtém variáveis internas da simulação para analisar o BBA
         %E a medida do BPM próximo ao Quadrupolo
         pos = findCenter(ringTemp,orbitTemp,ind);
@@ -52,69 +52,5 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
     BBAresult.posBPM = posBPM;
     BBAresult.posQuadruFinal = posQuadruFinal;
     BBAresult.BBAdir = dir;
-    
-%{
-    %Obtém os valores que minimizam a função de mérito
-    %Utilizando Interpolação Spline
-    %OBS: Regressão linear assumindo uma parábola não funcionou muito bem
-    vkicks = min(kicks):(max(kicks)-min(kicks))/1000000:max(kicks);
-    interp = interp1(kicks,meritfunction,vkicks,'spline');
-    [M,I] = min(interp);
-    kickMin = vkicks(I);
-    functionMin = M;
-    
-    vQuadru = min(centerQuadru):(max(centerQuadru)-min(centerQuadru))/1000000:max(centerQuadru);
-    interp = interp1(centerQuadru,meritfunction,vQuadru,'spline');
-    [M,I] = min(interp);
-    centerQuadruMin = vQuadru(I);
-    
-    vBPM = min(centerBPM):(max(centerBPM)-min(centerBPM))/1000000:max(centerBPM);
-    interp = interp1(centerBPM,meritfunction,vBPM,'spline');
-    [M,I] = min(interp);
-    centerBPMMin = vBPM(I);
-    
-    %Obtém a trajetória com o kick que minimiza a função de mérito
-    %E obtém mais variáveis internas para analisar o BBA
-    ringTemp = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corr,dir) + kickMin, corr, dir);
-    orbitTemp = findorbit6(ringTemp,1:length(ringTemp));
-    if(dir == 'x')
-        pos = findCenter(ringTemp,orbitTemp,ind);
-        angQuadru = pos(2);
-        posAux = pos(3); 
-    end
-    if(dir == 'y')
-        pos = findCenter(ringTemp,orbitTemp,ind);
-        angQuadru = pos(4);
-        posAux = pos(1);
-    end
-    desvEnerg = orbitTemp(5,ind);
-    
-    %Organiza os dados para enviar como retorno da função BBAscan
-    BBAresult = [];
-    BBAresult.kickMin = kickMin;
-    BBAresult.functionMin = functionMin;
-    BBAresult.centerBPMMin = centerBPMMin;
-    BBAresult.centerQuadruMin = centerQuadruMin;
-    BBAresult.centerQuadruPosPerp = posAux;
-    BBAresult.angQuadru = angQuadru;
-    if(dir == 'x')
-        pos = findFinal(ringTemp,orbitTemp,ind);
-        BBAresult.posQuadruFinal = pos(1);
-        BBAresult.angQuadruFinal = pos(2);
-        BBAresult.posQuadruInicio = orbitTemp(1,ind);
-        BBAresult.angQuadruInicio = orbitTemp(2,ind);
-    end
-    if(dir == 'y')
-        pos = findFinal(ringTemp,orbitTemp,ind);
-        BBAresult.posQuadruFinal = pos(3);
-        BBAresult.angQuadruFinal = pos(4);
-        BBAresult.posQuadruInicio = orbitTemp(3,ind);
-        BBAresult.angQuadruInicio = orbitTemp(4,ind);
-    end
-    BBAresult.desvEnerg = desvEnerg;
-    BBAresult.kicks = kicks;
-    BBAresult.meritfunction = meritfunction;
-    
-    %}
 end
 

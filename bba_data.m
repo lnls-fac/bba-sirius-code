@@ -6,7 +6,7 @@ random_error = false; % define se colocaremos erros aleatórios nos BPM's ou nã
 
 for m=1:1 %for m=0:length(machine)
     for recursao=0:0
-        for i=1:length(list_bpm) %for i=1:length(list_bpm)
+        for i=1:length(list_bpm)
             t0 = datenum(datetime('now'));
             %escolhe o anel e liga a cavidade de RF e a emissão de radiação
             if(m==0)
@@ -54,6 +54,31 @@ for m=1:1 %for m=0:length(machine)
             
             %ringAux = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + BBAresultX.kickMin, corrs(1), 'x');
             %Kresult = Kscan(ringAux,family_data,quadru,bpm,is_skew,range,4*DeltaK(1),random_error);
+
+            data = [];
+            %dados de "rótulo" do bpm e quadrupolo
+            data.bpm = bpm;
+            data.quadru = quadru;
+            data.is_skew = is_skew;
+            data.is_sextupole = is_sextupole;
+            %dados que podem sem tabelados (são calculados idealmente)
+            data.corrs = corrs;
+            data.kicksMax = kicksMax;
+            data.DeltaK = DeltaK;
+            %grava dos parâmetros dos dados simulados
+            data.recursao = recursao;
+            data.range = range;
+            data.random_error = random_error;
+            data.ring = ring;
+            %dados o BBAresult
+            data.BBAresultX = BBAresultX;
+            data.BBAresultY = BBAresultY;
+            %dados do Kresult
+            %data.Kresult = Kresult;
+            
+            string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+            save(string,'data');
+            tf = datenum(datetime('now'));
             
             fprintf('Índice do BPM: %d\n', bpm);
             fprintf('Índice do Quadrupolo mais perto: %d\n', quadru);
@@ -64,39 +89,8 @@ for m=1:1 %for m=0:length(machine)
             %fprintf('Kicks: %d %d\n', kicksMax(1), kicksMax(2));
             %fprintf('DeltaK: %d %d\n', DeltaK(1), DeltaK(2));
             fprintf('CENTRO DO QUADRUPOLO: (%d , %d)\n', ring{quadru}.T2(1), ring{quadru}.T2(3));
+            fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
             fprintf('--------------------\n');
-
-            data = [];
-            data.bpm = bpm;
-            data.quadru = quadru;
-            data.corrs = corrs;
-            data.recursao = recursao;
-            %anel final após a recursao
-            data.ring = ring;
-            %dados o BBAresult
-            data.BBAresultX = BBAresultX;
-            data.BBAresultY = BBAresultY;
-            %dados do Kresult
-            %data.Kresult = Kresult;
-            %--------
-            %{
-            data.kickMin = [BBAresultX.kickMin BBAresultY.kickMin];
-            data.functionMin = [BBAresultX.functionMin BBAresultY.functionMin];
-            data.centerQuadru = [BBAresultX.centerQuadruMin BBAresultY.centerQuadruMin];
-            data.centerBPM = [BBAresultX.centerBPMMin BBAresultY.centerBPMMin];
-            data.angQuadru = [BBAresultX.angQuadru BBAresultY.angQuadru];
-            data.posQuadruFinal = [BBAresultX.posQuadruFinal BBAresultY.posQuadruFinal];
-            data.angQuadruFinal = [BBAresultX.angQuadruFinal BBAresultY.angQuadruFinal];
-            data.posQuadruInicio = [BBAresultX.posQuadruInicio BBAresultY.posQuadruInicio];
-            data.angQuadruInicio = [BBAresultX.angQuadruInicio BBAresultY.angQuadruInicio];
-            data.desvEnerg = [BBAresultX.desvEnerg BBAresultY.desvEnerg];
-            data.centerQuadruPosPerp = [BBAresultX.centerQuadruPosPerp BBAresultY.centerQuadruPosPerp];
-            %}
-            
-            string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
-            save(string,'data');
-                tf = datenum(datetime('now'));
-        fprintf('%.2f\n', (tf-t0)*100000);
         end
     end
 
