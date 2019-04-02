@@ -1,5 +1,8 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'plusK';
+folder = 'sext';
+%'plusK' é o BBa normal
+%selecionar a pasta 'sext' automaticamente muda o algoritmo para
+%usar a força de sextupolos onde for possível
 
 range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
@@ -30,7 +33,11 @@ for m=1:1 %for m=0:length(machine)
             kicksMax = [selectMaxKick(twi,quadru,corrs(1),'x') selectMaxKick(twi,quadru,corrs(2),'y')];
             %DeltaK depende se é no termo de quadrupolo ou de sextupolo
             %DeltaK também depende de qual a função de mérito do BBA
-            DeltaKaux = [selectDeltaK(the_ring,family_data,twi,quadru,'x',is_skew) selectDeltaK(the_ring,family_data,twi,quadru,'y',is_skew)];
+            if strcmp(folder,'sext') 
+                DeltaKaux = [selectDeltaK_sext(the_ring,family_data,twi,quadru,'x',is_sextupole) selectDeltaK_sext(the_ring,family_data,twi,quadru,'y',is_sextupole)];
+            else
+                DeltaKaux = [selectDeltaK(the_ring,family_data,twi,quadru,'x',is_skew) selectDeltaK(the_ring,family_data,twi,quadru,'y',is_skew)];
+            end
             %OBS: Tudo isso pode ser calculado só uma vez e criar uma
             %tabela posteriormente, sendo necessário apenas ler a tabela e
             %não ficar repetindo as contas
@@ -39,17 +46,37 @@ for m=1:1 %for m=0:length(machine)
             %média harmônica dos dois DeltaK calculados anteriormente
 
             if(recursao == 0)
-                BBAresultX = BBAscan(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error);
-                BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
+                if strcmp(folder,'sext') 
+                	BBAresultX = BBAscan_sext(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error,is_sextupole);
+                    BBAresultY = BBAscan_sext(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error,is_sextupole);
+                else
+                    BBAresultX = BBAscan(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error);
+                    BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
+                end
             else
                 string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao-1) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
                 load(string);
                 ring = data.ring;
-                kick = data.kickMin(1);
+                kick = data.BBAanalyseX.kickMin;
                 ring = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + kick, corrs(1), 'x');
-                BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
-                ring = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(2),'y') + BBAresultY.kickMin, corrs(2), 'y');
-                BBAresultX = BBAscan(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error);
+                if strcmp(folder,'sext') 
+                    BBAresultY = BBAscan_sext(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error,is_sextupole);
+                else
+                    BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
+                end
+                interp_num = 1000000;
+                kicks = BBAresultY.kicks;
+                meritfunction = BBAresultY.meritfunction;
+                vkicks = min(kicks):(max(kicks)-min(kicks))/interp_num:max(kicks);
+                interp = interp1(kicks,meritfunction,vkicks,'spline');
+                [M,I] = min(interp);
+                kickMin = vkicks(I);
+                ring = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(2),'y') + kickMin, corrs(2), 'y');
+                if strcmp(folder,'sext')
+                    BBAresultX = BBAscan_sext(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error,is_sextupole);
+                else
+                    BBAresultX = BBAscan(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaK(1),random_error);
+                end
             end
             
             %ringAux = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + BBAresultX.kickMin, corrs(1), 'x');

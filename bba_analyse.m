@@ -1,5 +1,5 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'plusK';
+folder = 'sext';
 
 range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
