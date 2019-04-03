@@ -9,6 +9,7 @@ recursao = 0;
 
 pot = 1e6; % seta a escola dos dados (um)
 corrigir = true; % configura se usará as expressões teóricas de correção
+corrigir_ang = false;
 
 %carrega o anel correspondente
 if(m==0)
@@ -44,8 +45,10 @@ correcao1x = {};
 correcao2x = {};
 correcao1y = {};
 correcao2y = {};
-correcao3x = {};
-correcao3y = {};
+correcao3x_X = {};
+correcao3y_X = {};
+correcao3x_Y = {};
+correcao3y_Y = {};
 
 for i=1:3
     text_bpm{i} = [];
@@ -70,8 +73,10 @@ for i=1:3
     correcao2x{i} = [];
     correcao1y{i} = [];
     correcao2y{i} = [];
-    correcao3x{i} = [];
-    correcao3y{i} = [];
+    correcao3x_X{i} = [];
+    correcao3y_X{i} = [];
+    correcao3x_Y{i} = [];
+    correcao3y_Y{i} = [];
 end
 
 t0 = datenum(datetime('now'));
@@ -116,7 +121,8 @@ for i=1:length(alist_bpm)
     functionMin = data.BBAanalyseY.functionMin*pot*pot;
     functionMinY{index} = [functionMinY{index}; functionMin];
     
-    posCenterQuadru = [pot*ring{quadru}.T2(1); pot*ring{quadru}.T2(2); pot*ring{quadru}.T2(3); pot*ring{quadru}.T2(4); 0; 0];
+    %posCenterQuadru = [pot*ring{quadru}.T2(1); pot*ring{quadru}.T2(2); pot*ring{quadru}.T2(3); pot*ring{quadru}.T2(4); 0; 0];
+    posCenterQuadru = [pot*ring{quadru}.T2(1); 0; pot*ring{quadru}.T2(3); 0; 0; 0];
     
     posQuadruMin = data.BBAanalyseX.posQuadruMin*pot;
     posBPMMin = data.BBAanalyseX.posBPMMin*pot;
@@ -135,10 +141,17 @@ for i=1:length(alist_bpm)
         else
             D = findsposOff(the_ring,quadru) - findsposOff(the_ring,bpm);
         end
-        %x0l = data.BBAanalyseX.posQuadruMin(2)*pot;
-        %y0l = data.BBAanalyseX.posQuadruMin(4)*pot;
-        x0l = 0; %Não corrige erro do angulo
-        y0l = 0; %Não corrige erro do angulo
+        if(corrigir_ang == true)
+            x0lX = data.BBAanalyseX.posQuadruMin(2);
+            y0lX = data.BBAanalyseX.posQuadruMin(4);
+            x0lY = data.BBAanalyseY.posQuadruMin(2);
+            y0lY = data.BBAanalyseY.posQuadruMin(4);
+        else
+            x0lX = 0; %Não corrige erro do angulo
+            y0lX = 0; %Não corrige erro do angulo
+            x0lY = 0; %Não corrige erro do angulo
+            y0lY = 0; %Não corrige erro do angulo
+        end
         Gx = ring{quadru}.PolynomA(1);
         Gy = ring{quadru}.PolynomB(1);
         K = ring{quadru}.PolynomB(2);
@@ -154,17 +167,21 @@ for i=1:length(alist_bpm)
         end
         correcao1x{index} = [correcao1x{index}, pot*x0];
         correcao1y{index} = [correcao1y{index}, pot*y0];
-        correcao2x{index} = [correcao2x{index}, pot*((1/8)*(-Gy)*L*L + (1/8)*x0*(-K)*L*L + (Gy*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(x0l*L/2)*(1 + (-K)*L*L/24)];
-        correcao2y{index} = [correcao2y{index}, pot*((1/8)*(Gx)*L*L + (1/8)*y0*(K)*L*L + (Gx*L*L)*(K*L*L)/(12*32)) + sign(bpm-quadru)*(y0l*L/2)*(1 + (K)*L*L/24)];
-        correcao3x{index} = [correcao3x{index}, pot*(D/2)*((-Gy)*L + x0*(-K)*L + ((-Gy)*L*L)*((-K)*L)/24) + sign(bpm-quadru)*x0l*D*(1 + (-K)*L*L/8)];
-        correcao3y{index} = [correcao3y{index}, pot*(D/2)*((Gx)*L + y0*(K)*L + ((Gx)*L*L)*((K)*L)/24) + sign(bpm-quadru)*y0l*D*(1 + (K)*L*L/8)];
+        correcao2x{index} = [correcao2x{index}, pot*((1/8)*(-Gy)*L*L + (1/8)*x0*(-K)*L*L + (Gy*L*L)*(K*L*L)/(12*32)) + pot*(D/2)*((-Gy)*L + x0*(-K)*L + ((-Gy)*L*L)*((-K)*L)/24)];
+        correcao2y{index} = [correcao2y{index}, pot*((1/8)*(Gx)*L*L + (1/8)*y0*(K)*L*L + (Gx*L*L)*(K*L*L)/(12*32)) + pot*(D/2)*((Gx)*L + y0*(K)*L + ((Gx)*L*L)*((K)*L)/24)];
+        correcao3x_X{index} = [correcao3x_X{index}, pot*sign(bpm-quadru)*(x0lX*L/2)*(1 + (-K)*L*L/24) + pot*sign(bpm-quadru)*x0lX*D*(1 + (-K)*L*L/8)];
+        correcao3y_X{index} = [correcao3y_X{index}, pot*sign(bpm-quadru)*(y0lX*L/2)*(1 + (K)*L*L/24) + pot*sign(bpm-quadru)*y0lX*D*(1 + (K)*L*L/8)];
+        correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x0lY*L/2)*(1 + (-K)*L*L/24) + pot*sign(bpm-quadru)*x0lY*D*(1 + (-K)*L*L/8)];
+        correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y0lY*L/2)*(1 + (K)*L*L/24) + pot*sign(bpm-quadru)*y0lY*D*(1 + (K)*L*L/8)];
     else
         correcao1x{index} = [correcao1x{index}, 0];
         correcao1y{index} = [correcao1y{index}, 0];
         correcao2x{index} = [correcao2x{index}, 0];
         correcao2y{index} = [correcao2y{index}, 0];
-        correcao3x{index} = [correcao3x{index}, 0];
-        correcao3y{index} = [correcao3y{index}, 0];
+        correcao3x_X{index} = [correcao3x_X{index}, 0];
+        correcao3y_X{index} = [correcao3y_X{index}, 0];
+        correcao3x_Y{index} = [correcao3x_Y{index}, 0];
+        correcao3y_Y{index} = [correcao3y_Y{index}, 0];
     end
 end
 tf = datenum(datetime('now'));
@@ -245,11 +262,11 @@ for i=1:3
     width_line = 2;
     plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruX{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2x,desvQuadruX{i}(1,:) - correcao1x{i},desvQuadruX{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},[l(i,:) '-'], 'linewidth', width_line);
     
     plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruX{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
-    plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_X{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_X{i},[l(i,:) '-'], 'linewidth', width_line);
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
 end
@@ -300,11 +317,11 @@ for i=1:3
     width_line = 2;
     plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruY{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2x,desvQuadruY{i}(1,:) - correcao1x{i},desvQuadruY{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_Y{i},[l(i,:) '-'], 'linewidth', width_line);
     
     plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruY{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
-    plot(gr2y,desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMY{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_Y{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},[l(i,:) '-'], 'linewidth', width_line);
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
 end
@@ -355,11 +372,11 @@ for i=1:3
     width_line = 2;
     plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruX{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2x,desvQuadruX{i}(1,:) - correcao1x{i},desvQuadruY{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},[l(i,:) '-'], 'linewidth', width_line);
     
     plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruY{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
-    plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},l(i,:), 'linewidth', width_line);
-    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},[l(i,:) '-'], 'linewidth', width_line);
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
 end
@@ -370,6 +387,24 @@ legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
 
+figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Testes']);
+figAng1 = subplot(1,2,1);
+figAng2 = subplot(1,2,2);
+figAng1.FontSize = size_num;
+figAng2.FontSize = size_num;
+hold(figAng1,'on');
+hold(figAng2,'on');
+xlabel(figAng1,'X: funcao beta','FontSize',size_num);
+ylabel(figAng1,'X: angulo','FontSize',size_num);
+xlabel(figAng2,'Y: funcao beta','FontSize',size_num);
+ylabel(figAng2,'Y: angulo','FontSize',size_num);
+for i=1:3
+    width_line = 2;
+    plot(figAng1,twi.etax(listquadru{i}),desvQuadruX{i}(2,:),l(i,:), 'linewidth', width_line);
+    plot(figAng2,twi.etax(listquadru{i}),desvQuadruX{i}(4,:),l(i,:), 'linewidth', width_line);
+end
+legend(figAng1,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(figAng2,{'Quadrupolo','QS','Sextupolo + QS'});
 %{
 
 %cria os espaços para os gráficos da terceira figura

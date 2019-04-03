@@ -1,11 +1,13 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
-%'plusK' é o BBa normal
+folder = 'plusK';
+%'plusK' é o BBA normal
 %selecionar a pasta 'sext' automaticamente muda o algoritmo para
 %usar a força de sextupolos onde for possível
 
 range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
+
+interp_num = 1000000;
 
 for m=1:1 %for m=0:length(machine)
     for recursao=0:0
@@ -64,7 +66,6 @@ for m=1:1 %for m=0:length(machine)
                 else
                     BBAresultY = BBAscan(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaK(2),random_error);
                 end
-                interp_num = 1000000;
                 kicks = BBAresultY.kicks;
                 meritfunction = BBAresultY.meritfunction;
                 vkicks = min(kicks):(max(kicks)-min(kicks))/interp_num:max(kicks);
@@ -79,8 +80,20 @@ for m=1:1 %for m=0:length(machine)
                 end
             end
             
-            %ringAux = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + BBAresultX.kickMin, corrs(1), 'x');
-            %Kresult = Kscan(ringAux,family_data,quadru,bpm,is_skew,range,4*DeltaK(1),random_error);
+            if strcmp(folder,'plusK')
+                if(recursao == 0)
+                    ringAux = ring;
+                else
+                    kicks = BBAresultX.kicks;
+                    meritfunction = BBAresultY.meritfunction;
+                    vkicks = min(kicks):(max(kicks)-min(kicks))/interp_num:max(kicks);
+                    interp = interp1(kicks,meritfunction,vkicks,'spline');
+                    [M,I] = min(interp);
+                    kickMin = vkicks(I);
+                    ringAux = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + kickMin, corrs(1), 'x');
+                end
+                Kresult = Kscan(ringAux,family_data,quadru,bpm,is_skew,range,4*DeltaK(1),random_error);
+            end
 
             data = [];
             %dados de "rótulo" do bpm e quadrupolo
@@ -101,7 +114,7 @@ for m=1:1 %for m=0:length(machine)
             data.BBAresultX = BBAresultX;
             data.BBAresultY = BBAresultY;
             %dados do Kresult
-            %data.Kresult = Kresult;
+            data.Kresult = Kresult;
             
             string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
             save(string,'data');
