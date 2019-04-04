@@ -8,7 +8,7 @@ range = 10;
 random_error = false;
 
 corrigir = true;
-corrigir_ang = false;
+corrigir_ang = 0;
 
 %carrega o anel correspondente
 if(m==0)
@@ -28,13 +28,11 @@ xlabel(ax1,'xQuadru (um)');
 ylabel(ax1,'yQuadru (um)');
 zlabel(ax1, 'Desvio (m^2)');
 
-width_line = 1;
-
 %colormap(gray)
 colormap(flipud(gray(256)));
 
 %for i=1:length(alist_bpm)
-for i=1:13
+for i=1:15
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -120,10 +118,10 @@ for i=1:13
     %surf(xQuadru,yQuadru,F(xQuadru,yQuadru));
     %contourf(xQuadru - xReal,yQuadru - yReal,func);
     %contourf(Xq, Yq, Vq);
-    plot(xMinQuadru - xReal - corr1x ,yMinQuadru - yReal - corr1y,l1(index,:),'linewidth', width_line);
+    plot(xMinQuadru - xReal - corr1x ,yMinQuadru - yReal - corr1y,l(index,:));
     %plot(xReal,yReal,'ro');
     %plot(0,0,'ro');
-    plot(xMinBPM - xReal - corr1x - corr2x - corr3x,yMinBPM - yReal - corr1y - corr2y - corr3y,l2(index,:),'linewidth', width_line);
+    plot(xMinBPM - xReal,yMinBPM - yReal,l(index,:));
     fprintf('%.3f %.3f\n', xMinQuadru - xReal - corr1x, yMinQuadru - yReal - corr1y);
     fprintf('%.3f %.3f\n', xMinBPM - xReal - corr1x - corr2x - corr3x, yMinBPM - yReal - corr1y - corr2y - corr3y);
     fprintf('--------------------\n');

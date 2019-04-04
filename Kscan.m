@@ -50,9 +50,10 @@ function Kresult = Kscan(ring,family_data,ind,bpm,is_skew,range,DeltaK,random_er
     end
    
     %figure; plot(Ks,meritfunctionK);
+    interp_num = 1000000;
     
     %Encontra a derivada quando K=0
-    vKs = min(Ks):(max(Ks)-min(Ks))/1000000:max(Ks);
+    vKs = min(Ks):(max(Ks)-min(Ks))/interp_num:max(Ks);
     interpx = interp1(Ks,meritfunctionKx,vKs,'spline');
     interpy = interp1(Ks,meritfunctionKy,vKs,'spline');
     index = (size(vKs,2)-1)/2;
@@ -61,6 +62,7 @@ function Kresult = Kscan(ring,family_data,ind,bpm,is_skew,range,DeltaK,random_er
     
     %Organiza os dados para enviar como retorno da função
     Kresult = [];
+    Kresult.interp_num = interp_num;
     Kresult.Ks = Ks;
     Kresult.meritfunctionKx = meritfunctionKx;
     Kresult.meritfunctionKy = meritfunctionKy;

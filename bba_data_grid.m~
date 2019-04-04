@@ -7,7 +7,7 @@ range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 
 for m=1:1 %for m=0:length(machine)
-    for i=13:length(list_bpm) %for i=1:length(list_bpm)
+    for i=2:40 %for i=1:length(list_bpm)
         t0 = datenum(datetime('now'));    
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
@@ -53,7 +53,6 @@ for m=1:1 %for m=0:length(machine)
         % organiza os dados de forma matricial
         
         points = BBAresult.points;
-        %{
         kickx = zeros(2*range+1,2*range+1);
         kicky = zeros(2*range+1,2*range+1);
         func = zeros(2*range+1,2*range+1);
@@ -84,7 +83,6 @@ for m=1:1 %for m=0:length(machine)
                 yBPM(k,j) = posBPM(3,(j-1)*(2*range + 1) + k);
             end
         end
-        %}
 
         data = [];
         data.bpm = bpm;
@@ -97,19 +95,17 @@ for m=1:1 %for m=0:length(machine)
         %----
         data.range = range;
         data.random_error = random_error;
-        %BBAresult
-        data.points = BBAresult.points; 
-        data.posQuadru = BBAresult.posQuadru;
-        data.posBPM = BBAresult.posBPM;
-        %{
+        %----
+        data.points = BBAresult.points;
         data.kickx = kickx;
         data.kicky = kicky;
         data.func = func;
+        data.posQuadru = BBAresult.posQuadru;
+        data.posBPM = BBAresult.posBPM;
         data.xQuadru = xQuadru;
         data.yQuadru = yQuadru;
         data.xBPM = xBPM;
         data.yBPM = yBPM;
-        %}
             
         string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
         save(string,'data');

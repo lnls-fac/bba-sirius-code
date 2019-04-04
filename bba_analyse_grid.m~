@@ -16,7 +16,7 @@ else
 end
 
 %for i=1:length(alist_bpm)
-for i=10:13
+for i=1:20
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -39,7 +39,7 @@ for i=10:13
         end
     end
             
-    posQuadru = data.posQuadru;
+    posQuadru = BBAresult.posQuadru;
     xQuadru = zeros(2*range+1,2*range+1);
     yQuadru = zeros(2*range+1,2*range+1);
     xlQuadru = zeros(2*range+1,2*range+1);
@@ -53,7 +53,7 @@ for i=10:13
         end
     end
             
-    posBPM = data.posBPM;
+    posBPM = BBAresult.posBPM;
     xBPM = zeros(2*range+1,2*range+1);
     yBPM = zeros(2*range+1,2*range+1);
     for j = 1:2*range+1
@@ -66,6 +66,8 @@ for i=10:13
     data.kickx = kickx;
     data.kicky = kicky;
     data.func = func;
+    data.posQuadru = BBAresult.posQuadru;
+    data.posBPM = BBAresult.posBPM;
     data.xQuadru = xQuadru;
     data.yQuadru = yQuadru;
     data.xBPM = xBPM;
@@ -93,9 +95,6 @@ for i=10:13
     xMinBPM = Xb(row,col);
     yMinBPM = Yb(row,col);
     
-    xlMinQuadru = Xlq(row,col);
-    ylMinQuadru = Ylq(row,col);
-    
     BBAanalyse = [];
     BBAanalyse.steps_interp = steps_interp;
     BBAanalyse.Vq = Vq;
@@ -103,14 +102,10 @@ for i=10:13
     BBAanalyse.Yq = Yq;
     BBAanalyse.Xb = Xb;
     BBAanalyse.Yb = Yb;
-    BBAanalyse.Xlq = Xlq;
-    BBAanalyse.Ylq = Ylq;
     BBAanalyse.xMinQuadru = xMinQuadru;
     BBAanalyse.yMinQuadru = yMinQuadru;
     BBAanalyse.xMinBPM = xMinBPM;
     BBAanalyse.yMinBPM = yMinBPM;
-    BBAanalyse.xlMinQuadru = xlMinQuadru;
-    BBAanalyse.ylMinQuadru = ylMinQuadru;
     BBAanalyse.xReal = xReal;
     BBAanalyse.yReal = yReal;
     

@@ -1,11 +1,13 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
+folder = 'plusK';
 
 %configuracoes do arquivo a ser carregado
 m = 1;
+recursao = 1;
+
 range = 10;
 random_error = false;
-recursao = 0;
+interp_num = 1000000;
 
 pot = 1e6; % seta a escola dos dados (um)
 corrigir = true; % configura se usará as expressões teóricas de correção
@@ -87,7 +89,7 @@ for i=1:length(alist_bpm)
     is_sextupole = isSextupole(family_data,quadru);
     
     %Abre os arquivos das simulações neste bpm
-    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' num2str(interp_num) '_' 'data.mat'];
     load(string);
     
     %Escolhe o indice correto para cada quadrupolo
@@ -457,7 +459,7 @@ for i=1:length(alist_bpm)
     is_sextupole = isSextupole(family_data,quadru);
     
     %Abre os arquivos das simulações neste bpm
-    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+    string = [caminho_arquivos folder '/' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' num2str(interp_num) '_' 'data.mat'];
     load(string);
     
     %Seta a escola dos dados (um)
