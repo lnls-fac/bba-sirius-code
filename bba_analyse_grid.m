@@ -16,7 +16,7 @@ else
 end
 
 %for i=1:length(alist_bpm)
-for i=10:13
+for i=13:length(alist_bpm)
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -84,6 +84,9 @@ for i=10:13
     
     minMatrix = min(Vq(:));
     [row,col] = find(Vq == minMatrix);
+    kickxMin = kX(row,col);
+    kickyMin = kY(row,col);
+    
     xMinQuadru = Xq(row,col);
     yMinQuadru = Yq(row,col);
     
@@ -105,6 +108,8 @@ for i=10:13
     BBAanalyse.Yb = Yb;
     BBAanalyse.Xlq = Xlq;
     BBAanalyse.Ylq = Ylq;
+    BBAanalyse.kickxMin = kickxMin;
+    BBAanalyse.kickyMin = kickyMin;
     BBAanalyse.xMinQuadru = xMinQuadru;
     BBAanalyse.yMinQuadru = yMinQuadru;
     BBAanalyse.xMinBPM = xMinBPM;

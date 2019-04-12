@@ -2,7 +2,7 @@ caminho_arquivos = '../bba-sirius-data/';
 folder = 'plusK';
 
 %configuracoes do arquivo a ser carregado
-m = 1;
+m = 0;
 recursao = 1;
 
 range = 10;
@@ -82,6 +82,7 @@ for i=1:3
 end
 
 t0 = datenum(datetime('now'));
+%for i=1:length(alist_bpm)
 for i=1:length(alist_bpm)
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -389,24 +390,6 @@ legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
 
-figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Testes']);
-figAng1 = subplot(1,2,1);
-figAng2 = subplot(1,2,2);
-figAng1.FontSize = size_num;
-figAng2.FontSize = size_num;
-hold(figAng1,'on');
-hold(figAng2,'on');
-xlabel(figAng1,'X: funcao beta','FontSize',size_num);
-ylabel(figAng1,'X: angulo','FontSize',size_num);
-xlabel(figAng2,'Y: funcao beta','FontSize',size_num);
-ylabel(figAng2,'Y: angulo','FontSize',size_num);
-for i=1:3
-    width_line = 2;
-    plot(figAng1,twi.etax(listquadru{i}),desvQuadruX{i}(2,:),l(i,:), 'linewidth', width_line);
-    plot(figAng2,twi.etax(listquadru{i}),desvQuadruX{i}(4,:),l(i,:), 'linewidth', width_line);
-end
-legend(figAng1,{'Quadrupolo','QS','Sextupolo + QS'});
-legend(figAng2,{'Quadrupolo','QS','Sextupolo + QS'});
 %{
 
 %cria os espaços para os gráficos da terceira figura

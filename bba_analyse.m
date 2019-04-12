@@ -5,7 +5,7 @@ range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % quantidade de pontos da interpolação
 
-for m=1:1 %for m=0:length(machine)
+for m=0:0 %for m=0:length(machine)
     for recursao=0:1
         for i=1:length(list_bpm)
             t0 = datenum(datetime('now'));
@@ -49,27 +49,39 @@ for m=1:1 %for m=0:length(machine)
             for i=1:6
                 var = posQuadru(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posQuadruMin = [posQuadruMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posQuadruMin = [posQuadruMin; vVar(I)];
+                catch
+                    posQuadruMin = [posQuadruMin; var(1)];
+                end
             end
             
             posBPMMin = [];
             for i=1:6
                 var = posBPM(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posBPMMin = [posBPMMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posBPMMin = [posBPMMin; vVar(I)];
+                catch
+                    posBPMMin = [posBPMMin; var(1)];
+                end
             end
             
             posQuadruFinalMin = [];
             for i=1:6
                 var = posQuadruFinal(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posQuadruFinalMin = [posQuadruFinalMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posQuadruFinalMin = [posQuadruFinalMin; vVar(I)];
+                catch
+                    posQuadruFinalMin = [posQuadruFinalMin; var(1)];
+                end
             end
             
             BBAanalyse = [];
@@ -105,27 +117,39 @@ for m=1:1 %for m=0:length(machine)
             for i=1:6
                 var = posQuadru(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posQuadruMin = [posQuadruMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posQuadruMin = [posQuadruMin; vVar(I)];
+                catch
+                    posQuadruMin = [posQuadruMin; var(1)];
+                end
             end
             
             posBPMMin = [];
             for i=1:6
                 var = posBPM(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posBPMMin = [posBPMMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posBPMMin = [posBPMMin; vVar(I)];
+                catch
+                    posBPMMin = [posBPMMin; var(1)];
+                end
             end
             
             posQuadruFinalMin = [];
             for i=1:6
                 var = posQuadruFinal(i,:);
                 vVar = min(var):(max(var)-min(var))/interp_num:max(var);
-                interp = interp1(var,meritfunction,vVar,'spline');
-                [M,I] = min(interp);
-                posQuadruFinalMin = [posQuadruFinalMin; vVar(I)];
+                try
+                    interp = interp1(var,meritfunction,vVar,'spline');
+                    [M,I] = min(interp);
+                    posQuadruFinalMin = [posQuadruFinalMin; vVar(I)];
+                catch
+                    posQuadruFinalMin = [posQuadruFinalMin; var(1)];
+                end
             end
             
             BBAanalyse = [];

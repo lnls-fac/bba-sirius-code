@@ -33,8 +33,16 @@ width_line = 1;
 %colormap(gray)
 colormap(flipud(gray(256)));
 
+sum1 = 0;
+sum2 = 0;
+sum3 = 0;
+
+i1 = 0;
+i2 = 0;
+i3 = 0;
+
 %for i=1:length(alist_bpm)
-for i=1:13
+for i=1:length(alist_bpm)
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -116,6 +124,19 @@ for i=1:13
         corr3y = 0;
     end
     
+    dist = (xMinBPM - xReal - corr1x - corr2x - corr3x)*(xMinBPM - xReal - corr1x - corr2x - corr3x);
+    dist = dist + (yMinBPM - yReal - corr1y - corr2y - corr3y)*(yMinBPM - yReal - corr1y - corr2y - corr3y);
+    if(index == 1)
+        i1 = i1 + 1;
+        sum1 = sum1 + sqrt(dist);
+    elseif(index == 2)
+        i2 = i2 + 1 ;
+        sum2 = sum2 + sqrt(dist);
+    elseif(index == 3)
+        i3 = i3 + 1;
+        sum3 = sum3 + sqrt(dist);
+    end
+    
     %surf(xQuadru,yQuadru,func);
     %surf(xQuadru,yQuadru,F(xQuadru,yQuadru));
     %contourf(xQuadru - xReal,yQuadru - yReal,func);
@@ -124,10 +145,14 @@ for i=1:13
     %plot(xReal,yReal,'ro');
     %plot(0,0,'ro');
     plot(xMinBPM - xReal - corr1x - corr2x - corr3x,yMinBPM - yReal - corr1y - corr2y - corr3y,l2(index,:),'linewidth', width_line);
+    tf = datenum(datetime('now'));
+    fprintf('Índice do BPM: %d\n', bpm);
+    fprintf('Índice do Quadrupolo mais perto: %d\n', quadru);
+    fprintf('É Skew: %d\n', is_skew);
+    fprintf('É Sextupolo: %d\n', is_sextupole);
     fprintf('%.3f %.3f\n', xMinQuadru - xReal - corr1x, yMinQuadru - yReal - corr1y);
     fprintf('%.3f %.3f\n', xMinBPM - xReal - corr1x - corr2x - corr3x, yMinBPM - yReal - corr1y - corr2y - corr3y);
-    fprintf('--------------------\n');
-    
-    tf = datenum(datetime('now'));
     fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
+    fprintf('--------------------\n');
 end
+    fprintf('%d %d %d', sum1/i1, sum2/i2, sum3/i3);
