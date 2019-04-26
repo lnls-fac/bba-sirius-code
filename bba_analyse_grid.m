@@ -16,7 +16,7 @@ else
 end
 
 %for i=1:length(alist_bpm)
-for i=13:length(alist_bpm)
+for i=1:1
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -101,13 +101,13 @@ for i=13:length(alist_bpm)
     
     BBAanalyse = [];
     BBAanalyse.steps_interp = steps_interp;
-    BBAanalyse.Vq = Vq;
-    BBAanalyse.Xq = Xq;
-    BBAanalyse.Yq = Yq;
-    BBAanalyse.Xb = Xb;
-    BBAanalyse.Yb = Yb;
-    BBAanalyse.Xlq = Xlq;
-    BBAanalyse.Ylq = Ylq;
+    %BBAanalyse.Vq = Vq;
+    %BBAanalyse.Xq = Xq;
+    %BBAanalyse.Yq = Yq;
+    %BBAanalyse.Xb = Xb;
+    %BBAanalyse.Yb = Yb;
+    %BBAanalyse.Xlq = Xlq;
+    %BBAanalyse.Ylq = Ylq;
     BBAanalyse.kickxMin = kickxMin;
     BBAanalyse.kickyMin = kickyMin;
     BBAanalyse.xMinQuadru = xMinQuadru;

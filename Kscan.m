@@ -30,8 +30,8 @@ function Kresult = Kscan(ring,family_data,ind,bpm,is_skew,range,DeltaK,random_er
         end
         dx = (orbitTemp(1,bpm) - orbitMain(1,bpm)) + errorRandomMax*r1;
         dy = (orbitTemp(3,bpm) - orbitMain(3,bpm)) + errorRandomMax*r2;
-        meritfunctionKx = [meritfunctionKx, dx];
-        meritfunctionKy = [meritfunctionKy, dy];
+        meritfunctionKx = [meritfunctionKx; dx];
+        meritfunctionKy = [meritfunctionKy; dy];
         
         %Obtém variáveis internas da simulação para analisar o Kscan
         %E a medida do BPM próximo ao Quadrupolo

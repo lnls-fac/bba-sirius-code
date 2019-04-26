@@ -7,7 +7,7 @@ range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 
 for m=1:1 %for m=0:length(machine)
-    for i=13:length(list_bpm) %for i=1:length(list_bpm)
+    for i=1:1 %for i=1:length(list_bpm)
         t0 = datenum(datetime('now'));    
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)

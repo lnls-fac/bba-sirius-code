@@ -20,11 +20,13 @@ text_bpm = {};
 text_quadru = {};
 listbpm = {};
 listquadru = {};
+cte = {};
 for i=1:3
     text_bpm{i} = [];
     text_quadru{i} = [];
     listbpm{i} = [];
     listquadru{i} = [];
+    cte{i} = [];
 end
 for i=1:length(alist_bpm)
     bpm = alist_bpm(i);
@@ -43,6 +45,14 @@ for i=1:length(alist_bpm)
     text_quadru{index} = [text_quadru{index}; quadru];
 	listbpm{index} = [listbpm{index}; bpm];
 	listquadru{index} = [listquadru{index}; quadru];
+    
+    L = the_ring{quadru}.Length;
+    if(bpm > quadru)
+        D = findsposOff(the_ring,bpm) - findsposOff(the_ring,quadru) - L;
+    else
+        D = findsposOff(the_ring,quadru) - findsposOff(the_ring,bpm);
+    end
+    cte{index} = [cte{index}; 1/(L/2 + D)];
 end
 tf = datenum(datetime('now'));
 fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
@@ -55,6 +65,7 @@ l = ['bo'; 'rs'; 'k*'];
 
 size_num = 20;
 
+%{
 %Cria os espaços para os gráficos na segunda figura
 if(corrigir == true)
     figure('NumberTitle', 'off', 'Name', [num2str(recursao) 'r - Gráficos Análise bbaX Corrigido']);
@@ -219,6 +230,7 @@ legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+%}
 
 %Cria os espaços para os gráficos na terceira figura
 if(corrigir == true)
@@ -250,6 +262,7 @@ for i=1:3
     width_line = 2;
     plot(medx,findsposOff(ring,listquadru{i}), abs(desvBPMXm{i}(1,:) - correcao1xm{i} - correcao2xm{i} - correcao3x_Xm{i}),[l(i,:) '-'], 'linewidth', width_line);
     plot(sigmx,findsposOff(ring,listquadru{i}),sigmaX{i},[l(i,:) '-'], 'linewidth', width_line);
+    %sigmaX{i}.*transpose(cte{i})
     
     plot(medy,findsposOff(ring,listquadru{i}),abs(desvBPMYm{i}(3,:) - correcao1ym{i} - correcao2ym{i} - correcao3y_Ym{i}),[l(i,:) '-'], 'linewidth', width_line);
     plot(sigmy,findsposOff(ring,listquadru{i}),sigmaY{i},[l(i,:) '-'], 'linewidth', width_line);
@@ -263,11 +276,16 @@ legend(sigmy,{'Quadrupolo','QS','Sextupolo + QS'});
 line(sigmx, [0 600],[10 10],'LineWidth',3);
 line(sigmy, [0 600],[10 10],'LineWidth',3);
 
+
 figure('NumberTitle', 'off', 'Name', ['teste']);
 test = subplot(1,1,1);
 hold(test,'on');
 for i=1:3
-    %plot(1/sqrt(twi.betax(listquadru{i})).*sqrt(1 + (1/4)*twi.alphax(listquadru{i}).*twi.alphax(listquadru{i})), sigmaX{i}, l(i,:));
-    %plot(abs(twi.etaxl(listquadru{i})), sigmaX{i}, l(i,:));
-    plot(1/sqrt(twi.betay(listquadru{i})).*sqrt(1 + (1/4)*twi.alphay(listquadru{i}).*twi.alphay(listquadru{i})), sigmaY{i}, l(i,:));
+    %plot((1/sqrt(twi.betax(listquadru{i}))).*sqrt(1 + (1/4)*twi.alphax(listquadru{i}).*twi.alphax(listquadru{i})) + twi.etaxl(listquadru{i}), sigmaX{i}.*transpose(cte{i}), l(i,:));
+    %plot(abs(twi.etax(listquadru{i})), sigmaX{i}.*transpose(cte{i}), l(i,:));
+    %plot((1/sqrt(twi.betay(listquadru{i}))).*sqrt(1 + (1/4)*twi.alphay(listquadru{i}).*twi.alphay(listquadru{i})), sigmaY{i}.*transpose(cte{i}), l(i,:));
+    %plot(twi.alphax(listquadru{i}), (sigmaX{i}.*transpose(cte{i})).*transpose(sqrt(twi.betax(listquadru{i}))), l(i,:));
+    %plot(sqrt(twi.betay(listquadru{i})), sigmaY{i}.*transpose(cte{i}), l(i,:));
+    plot(1./sqrt(twi.betax(listquadru{i})), sigmaX{i}.*transpose(cte{i}), l(i,:));
+    plot(twi.alphax(listquadru{i}), sigmaX{i}.*transpose(cte{i}), l(i,:));
 end

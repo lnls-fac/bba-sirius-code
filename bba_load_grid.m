@@ -42,7 +42,7 @@ i2 = 0;
 i3 = 0;
 
 %for i=1:length(alist_bpm)
-for i=1:length(alist_bpm)
+for i=1:1
     t0 = datenum(datetime('now'));
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
@@ -70,8 +70,8 @@ for i=1:length(alist_bpm)
     yMinQuadru = data.BBAanalyse.yMinQuadru*pot;
     xMinBPM = data.BBAanalyse.xMinBPM*pot;
     yMinBPM = data.BBAanalyse.yMinBPM*pot;
-    %xQuadru = data.xQuadru*pot;
-    %yQuadru = data.yQuadru*pot;
+    xQuadru = data.xQuadru*pot;
+    yQuadru = data.yQuadru*pot;
     %func = data.func*pot*pot;
     %{
     Vq = data.BBAanalyse.Vq*pot*pot;
@@ -139,7 +139,7 @@ for i=1:length(alist_bpm)
     
     %surf(xQuadru,yQuadru,func);
     %surf(xQuadru,yQuadru,F(xQuadru,yQuadru));
-    %contourf(xQuadru - xReal,yQuadru - yReal,func);
+    contourf(xQuadru - xReal,yQuadru - yReal,func);
     %contourf(Xq, Yq, Vq);
     plot(xMinQuadru - xReal - corr1x ,yMinQuadru - yReal - corr1y,l1(index,:),'linewidth', width_line);
     %plot(xReal,yReal,'ro');
@@ -155,4 +155,4 @@ for i=1:length(alist_bpm)
     fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
     fprintf('--------------------\n');
 end
-    fprintf('%d %d %d', sum1/i1, sum2/i2, sum3/i3);
+    fprintf('%d %d %d \n', sum1/i1, sum2/i2, sum3/i3);

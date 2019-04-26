@@ -1,12 +1,12 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
+folder = 'plusK';
 
 range = 10; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % quantidade de pontos da interpolação
 
-for m=0:0 %for m=0:length(machine)
-    for recursao=0:1
+for m=1:1 %for m=0:length(machine)
+    for recursao=1:1
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
             ring = the_ring;
@@ -29,20 +29,12 @@ for m=0:0 %for m=0:length(machine)
             %-----Análise do BBA na direção X-----
             
             BBAresult = data.BBAresultX;
-            BBAresultTune = data.BBAresultXtune;
             
             kicks = BBAresult.kicks;
             meritfunction = BBAresult.meritfunction;
             posQuadru = BBAresult.posQuadru;
             posBPM = BBAresult.posBPM;
             posQuadruFinal = BBAresult.posQuadruFinal;
-            
-            tune1 = BBAresultTune.deltaTune1;
-            tune2 = BBAresultTune.deltaTune2;
-            desvTune = tune1.*tune1 + tune2.*tune2;
-            posQuadruTune = BBAresultTune.posQuadru;
-            posBPMTune = BBAresultTune.posBPM;
-            posQuadruFinalTune = BBAresultTune.posQuadruFinal;
             
             %Obtém os valores que minimizam a função de mérito
             %Utilizando Interpolação Spline
@@ -52,11 +44,6 @@ for m=0:0 %for m=0:length(machine)
             [M,I] = min(interp);
             kickMin = vkicks(I);
             functionMin = M;
-            
-            interpTune = interp1(kicks,desvTune,vkicks,'spline');
-            [Mt,It] = min(interpTune);
-            kickMinTune = vkicks(It);
-            functionMinTune = Mt;
             
             posQuadruMin = [];
             posQuadruMinTune = [];
@@ -110,21 +97,13 @@ for m=0:0 %for m=0:length(machine)
             %-----Análise do BBA na direção Y-----
             
             BBAresult = data.BBAresultY;
-            BBAresultTune = data.BBAresultYtune;
             
             kicks = BBAresult.kicks;
             meritfunction = BBAresult.meritfunction;
             posQuadru = BBAresult.posQuadru;
             posBPM = BBAresult.posBPM;
             posQuadruFinal = BBAresult.posQuadruFinal;
-            
-            tune1 = BBAresultTune.deltaTune1;
-            tune2 = BBAresultTune.deltaTune2;
-            desvTune = tune1.*tune1 + tune2.*tune2;
-            posQuadruTune = BBAresultTune.posQuadru;
-            posBPMTune = BBAresultTune.posBPM;
-            posQuadruFinalTune = BBAresultTune.posQuadruFinal;
-            
+
             %Obtém os valores que minimizam a função de mérito
             %Utilizando Interpolação Spline
             %OBS: Regressão linear assumindo uma parábola não funcionou muito bem
@@ -133,12 +112,7 @@ for m=0:0 %for m=0:length(machine)
             [M,I] = min(interp);
             kickMin = vkicks(I);
             functionMin = M;
-            
-            interpTune = interp1(kicks,desvTune,vkicks,'spline');
-            [Mt,It] = min(interpTune);
-            kickMinTune = vkicks(It);
-            functionMinTune = Mt;
-            
+
             posQuadruMin = [];
             posQuadruMinTune = [];
             for i=1:6
@@ -373,21 +347,6 @@ for m=0:0 %for m=0:length(machine)
             y4X = D*y0lX - (1/8)*D*L*L*(x0lX*Kp-y0lX*K);
             x4Y = D*x0lY - (1/8)*D*L*L*(y0lY*Kp+x0lY*K);
             y4Y = D*y0lY - (1/8)*D*L*L*(x0lY*Kp-y0lY*K);
-
-            x0s = -L*y0lX/(2*sqrt(3));
-            y0s = L*x0lY/(2*sqrt(3));
-            x1 = -(1/8)*L*L*Gy + (1/384)*L*L*L*L*(Gx*Kp-Gy*K);
-            y1 = (1/8)*L*L*Gx - (1/384)*L*L*L*L*(Gy*Kp+Gx*K);
-            x2X = (1/2)*L*x0lX - (1/48)*L*L*L*(y0lX*Kp+x0lX*K);
-            y2X = (1/2)*L*y0lX - (1/48)*L*L*L*(x0lX*Kp-y0lX*K);
-            x2Y = (1/2)*L*x0lY - (1/48)*L*L*L*(y0lY*Kp+x0lY*K);
-            y2Y = (1/2)*L*y0lY - (1/48)*L*L*L*(x0lY*Kp-y0lY*K);
-            x3 = -D*(Gy*L)/2;
-            y3 = D*(Gx*L)/2;
-            x4X = D*x0lX - (1/8)*D*L*L*(y0lX*Kp+x0lX*K);
-            y4X = D*y0lX - (1/8)*D*L*L*(x0lX*Kp-y0lX*K);
-            x4Y = D*x0lY - (1/8)*D*L*L*(y0lY*Kp+x0lY*K);
-            y4Y = D*y0lY - (1/8)*D*L*L*(x0lY*Kp-y0lY*K);
             if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
                 correcao1x{index} = [correcao1x{index}, pot*x0];
                 correcao1y{index} = [correcao1y{index}, pot*y0];
@@ -409,14 +368,14 @@ for m=0:0 %for m=0:length(machine)
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
             if (strcmp(folder,'sext') || strcmp(folder,'sextt')) && is_sextupole == true
-                correcao1x{index} = [correcao1x{index}, pot*x0s];
-                correcao1y{index} = [correcao1y{index}, pot*y0s];
-                correcao2x{index} = [correcao2x{index}, pot*0 + pot*0];
-                correcao2y{index} = [correcao2y{index}, pot*0 + pot*0];
-                correcao3x_X{index} = [correcao3x_X{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3y_X{index} = [correcao3y_X{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(0 + 0)];
+                correcao1x{index} = [correcao1x{index}, pot*(x0lX*L)/(2*sqrt(3))];
+                correcao1y{index} = [correcao1y{index}, pot*(y0lY*L)/(2*sqrt(3))];
+                correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
+                correcao2y{index} = [correcao2y{index}, pot*y1 + pot*y3];
+                correcao3x_X{index} = [correcao3x_X{index}, pot*sign(bpm-quadru)*(x2X + x4X)];
+                correcao3y_X{index} = [correcao3y_X{index}, pot*sign(bpm-quadru)*(y2X + y4X)];
+                correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
+                correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
             
             if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
