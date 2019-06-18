@@ -4,13 +4,16 @@ folder = 'sext';
 %configuracoes do arquivo a ser carregado
 m = 0;
 recursao = 0;
-range = 10;
+range = 12;
 random_error = false;
 interp_num = 1000000;
 
 %configura se usará as expressões teóricas de correção
 corrigir = true; 
-corrigir_ang = true;
+corrigir_ang = false;
+
+%totalBPM = length(alist_bpm);
+totalBPM = length(alist_bpm);
 
 string = [caminho_arquivos folder '/' 'Graficos' '_' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(range) '_' num2str(random_error) '_' num2str(interp_num) '_' 'data.mat'];
 load(string);
@@ -73,8 +76,7 @@ for i=1:3
 end
 
 t0 = datenum(datetime('now'));
-%for i=1:length(alist_bpm)
-for i=1:length(alist_bpm)
+for i=1:totalBPM
     bpm = alist_bpm(i);
     quadru = alist_quadru(i);
     is_skew = isSkew(family_data,quadru);
@@ -141,12 +143,13 @@ for i=1:3
     plot(ax3,findsposOff(ring,listquadru{i}),functionMinX{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(ax4,findsposOff(ring,listquadru{i}),functionMinY{i},[l(i,:) '-'], 'linewidth', width_line);
 end
-%legend(ax1,{'Quadrupolo','QS','Sextupolo + QS'});
-%legend(ax2,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(ax1,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(ax2,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(ax3,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(ax4,{'Quadrupolo','QS','Sextupolo + QS'});
 
 %{
+
 %Cria os espaços para os gráficos na segunda figura
 if(corrigir == true)
     figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaX Corrigido']);
@@ -256,6 +259,7 @@ legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+
 %}
 
 %Cria os espaços para os gráficos na terceira figura
@@ -295,7 +299,7 @@ ylabel(gr2y,'y BPM-CM  (um)','FontSize',size_num);
 xlabel(gr3y,'posicao - s (m)','FontSize',size_num);
 ylabel(gr3y,'Y: Dist BPM e CM (um)','FontSize',size_num);
 for i=1:3
-    width_line = 2;
+    width_line = 2; 
     plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruX{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2x,desvQuadruX{i}(1,:) - correcao1x{i},desvQuadruY{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
     plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},[l(i,:) '-'], 'linewidth', width_line);
@@ -303,6 +307,61 @@ for i=1:3
     plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruY{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2y,desvBPMX{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},l(i,:), 'linewidth', width_line);
     plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},[l(i,:) '-'], 'linewidth', width_line);
+    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
+    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
+end
+legend(gr1x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
+legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+
+%Cria os espaços para os gráficos na terceira figura
+if(corrigir == true)
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaXY Corrigido Regr']);
+else
+    figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaXY Regr']);
+end
+gr1x = subplot(2,3,1);
+gr2x = subplot(2,3,2);
+gr3x = subplot(2,3,3);
+gr1y = subplot(2,3,4);
+gr2y = subplot(2,3,5);
+gr3y = subplot(2,3,6);
+gr1x.FontSize = size_num;
+gr2x.FontSize = size_num;
+gr3x.FontSize = size_num;
+gr1y.FontSize = size_num;
+gr2y.FontSize = size_num;
+gr3y.FontSize = size_num;
+hold(gr1x,'on');
+hold(gr2x,'on');
+hold(gr3x,'on');
+hold(gr1y,'on');
+hold(gr2y,'on');
+hold(gr3y,'on');
+xlabel(gr1x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr1x,'X: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2x,'x Feixe-CM (um)','FontSize',size_num);
+ylabel(gr2x,'y Feixe-CM (um)','FontSize',size_num);
+xlabel(gr3x,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3x,'X: Dist BPM e CM (um)','FontSize',size_num);
+xlabel(gr1y,'posicao - s (m)');
+ylabel(gr1y,'Y: Dist Feixe e CM (um)','FontSize',size_num);
+xlabel(gr2y,'x BPM-CM (um)','FontSize',size_num);
+ylabel(gr2y,'y BPM-CM  (um)','FontSize',size_num);
+xlabel(gr3y,'posicao - s (m)','FontSize',size_num);
+ylabel(gr3y,'Y: Dist BPM e CM (um)','FontSize',size_num);
+for i=1:3
+    width_line = 2; 
+    plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruX2{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2x,desvQuadruX2{i}(1,:) - correcao1x{i},desvQuadruY2{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX2{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},[l(i,:) '-'], 'linewidth', width_line);
+    
+    plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruY2{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
+    plot(gr2y,desvBPMX2{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},desvBPMY2{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},l(i,:), 'linewidth', width_line);
+    plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY2{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},[l(i,:) '-'], 'linewidth', width_line);
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
 end
@@ -350,7 +409,7 @@ if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
     end
 end
 
-if strcmp(folder,'sext') || strcmp(folder,'sextt')
+if strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder')
     %Cria os espaços para os gráficos na terceira figura
     if(corrigir == true)
         figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaXY Corrigido TUNE']);

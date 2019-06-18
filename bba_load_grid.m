@@ -1,13 +1,13 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'grid';
+folder = 'gridsext';
 
 %configuracoes do arquivo a ser carregado
-m = 1;
+m = 0;
 
-range = 10;
+range = 12;
 random_error = false;
 
-corrigir = true;
+corrigir = false;
 corrigir_ang = false;
 
 %carrega o anel correspondente
@@ -21,12 +21,17 @@ l1 = ['b*'; 'r*'; 'k*'];
 l2 = ['bs'; 'rs'; 'ks'];
 
 %cria os espaços para os gráficos da primeira figura
-figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Desvios']);
+figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' 'Desvios']);
 ax1 = subplot(1,1,1);
 hold(ax1,'on');
 xlabel(ax1,'xQuadru (um)');
 ylabel(ax1,'yQuadru (um)');
 zlabel(ax1, 'Desvio (m^2)');
+
+%ax2 = subplot(1,2,2);
+%hold(ax2,'on');
+%xlabel(ax2,'1/SL^2 (m)');
+%ylabel(ax2,'xQuadru (um)');
 
 width_line = 1;
 
@@ -72,7 +77,7 @@ for i=1:1
     yMinBPM = data.BBAanalyse.yMinBPM*pot;
     xQuadru = data.xQuadru*pot;
     yQuadru = data.yQuadru*pot;
-    %func = data.func*pot*pot;
+    func = data.func*pot*pot;
     %{
     Vq = data.BBAanalyse.Vq*pot*pot;
     Xq = data.BBAanalyse.Xq*pot;
@@ -83,6 +88,10 @@ for i=1:1
     
     %Calcula as expressões teóricas de correção
     if(corrigir == true)
+        
+        string = [caminho_arquivos folder '/' 'M' num2str(0) '_' num2str(bpm) '_' num2str(range) '_' num2str(random_error) '_' 'data.mat'];
+        load(string);
+        
         L = the_ring{quadru}.Length;
         if(bpm > quadru)
             D = findsposOff(the_ring,bpm) - findsposOff(the_ring,quadru) - L;
@@ -115,6 +124,9 @@ for i=1:1
         corr2y = pot*((1/8)*(Gx)*L*L + (1/8)*y0*(K)*L*L + (Gx*L*L)*(K*L*L)/(12*32)) + pot*(D/2)*((Gx)*L + y0*(K)*L + ((Gx)*L*L)*((K)*L)/24);
         corr3x = pot*sign(bpm-quadru)*(x0l*L/2)*(1 + (-K)*L*L/24) + pot*sign(bpm-quadru)*x0l*D*(1 + (-K)*L*L/8);
         corr3y = pot*sign(bpm-quadru)*(y0l*L/2)*(1 + (K)*L*L/24) + pot*sign(bpm-quadru)*y0l*D*(1 + (K)*L*L/8);
+        
+        corr1x = data.BBAanalyse.xMinQuadru*pot;
+        corr1y = data.BBAanalyse.yMinQuadru*pot;
     else
         corr1x = 0;
         corr1y = 0;
@@ -141,7 +153,8 @@ for i=1:1
     %surf(xQuadru,yQuadru,F(xQuadru,yQuadru));
     contourf(xQuadru - xReal,yQuadru - yReal,func);
     %contourf(Xq, Yq, Vq);
-    plot(xMinQuadru - xReal - corr1x ,yMinQuadru - yReal - corr1y,l1(index,:),'linewidth', width_line);
+    plot(ax1, xMinQuadru - xReal - corr1x , yMinQuadru - yReal - corr1y,l1(index,:),'linewidth', width_line);
+    %%text(ax1, xMinQuadru - xReal - corr1x ,yMinQuadru - yReal - corr1y, ['> ' int2str(ring{quadru}.PolynomB(3))]);
     %plot(xReal,yReal,'ro');
     %plot(0,0,'ro');
     plot(xMinBPM - xReal - corr1x - corr2x - corr3x,yMinBPM - yReal - corr1y - corr2y - corr3y,l2(index,:),'linewidth', width_line);
@@ -154,5 +167,8 @@ for i=1:1
     fprintf('%.3f %.3f\n', xMinBPM - xReal - corr1x - corr2x - corr3x, yMinBPM - yReal - corr1y - corr2y - corr3y);
     fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
     fprintf('--------------------\n');
+    
+    %plot(ax2, ((ring{quadru}.PolynomB(3))*(ring{quadru}.Length)*(ring{quadru}.Length)) ,xMinQuadru - xReal - corr1x,l1(index,:),'linewidth', width_line);
+    %text(ax2, ((ring{quadru}.PolynomB(3))*(ring{quadru}.Length)*(ring{quadru}.Length)) ,xMinQuadru - xReal - corr1x, ['> ' int2str(bpm - quadru)]);
 end
     fprintf('%d %d %d \n', sum1/i1, sum2/i2, sum3/i3);

@@ -6,13 +6,14 @@ random_error = false; % define se colocaremos erros aleatórios nos BPM's ou nã
 interp_num = 1000000; % quantidade de pontos da interpolação
 
 for m=1:1 %for m=0:length(machine)
-    for recursao=1:1
+    for recursao=0:1
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
             ring = the_ring;
         else
             ring = machine{m};
         end
+        %for i=1:length(list_bpm)
         for i=1:length(list_bpm)
             t0 = datenum(datetime('now'));
             
@@ -46,36 +47,69 @@ for m=1:1 %for m=0:length(machine)
             functionMin = M;
             
             posQuadruMin = [];
-            posQuadruMinTune = [];
+            posQuadruMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posQuadru(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMin = [posQuadruMin; interp(I)];
-                var = posQuadruTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posQuadruMinTune = [posQuadruMinTune; interp(It)];
+            end
+            
+            posQuadruMin2 = [];
+            for i=1:6
+                if (i == 1)
+                    var = posQuadru(i,:);
+                    p = polyfit(transpose(var), meritfunction, 2);
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    %{
+                    figure; plot(var, meritfunction, 'ko');
+                    hold on;
+                    plot(vVar, f);
+                    hold off;
+                    %}
+                    [Ma,Ia] = min(f);
+                    %posQuadruMin = [posQuadruMin; vVar(I)];
+                    posQuadruMin2 = [posQuadruMin2; -p(2)/(2*p(1))];
+                else
+                    posQuadruMin2 = [posQuadruMin2; 0];
+                end
             end
             
             posBPMMin = [];
-            posBPMMinTune = [];
+            posBPMMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posBPM(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMin = [posBPMMin; interp(I)];
-                var = posBPMTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posBPMMinTune = [posBPMMinTune; interp(It)];
+            end
+            
+            posBPMMin2 = [];
+            for i=1:6
+                if (i == 1)
+                    var = posBPM(i,:);
+                    p = polyfit(transpose(var), meritfunction, 2);
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    %{
+                    figure; plot(var, meritfunction, 'ko');
+                    hold on;
+                    plot(vVar, f);
+                    hold off;
+                    %}
+                    [Ma,Ia] = min(f);
+                    %posQuadruMin = [posQuadruMin; vVar(I)];
+                    posBPMMin2 = [posBPMMin2; -p(2)/(2*p(1))];
+                else
+                    posBPMMin2 = [posBPMMin2; 0];
+                end
             end
             
             posQuadruFinalMin = [];
-            posQuadruFinalMinTune = [];
+            posQuadruFinalMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posQuadruFinal(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMin = [posQuadruFinalMin; interp(I)];
-                var = posQuadruFinalTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posQuadruFinalMinTune = [posQuadruFinalMinTune; interp(It)];
             end
             
             BBAanalyse = [];
@@ -83,11 +117,13 @@ for m=1:1 %for m=0:length(machine)
             BBAanalyse.kickMin = kickMin;
             BBAanalyse.functionMin = functionMin;
             BBAanalyse.posQuadruMin = posQuadruMin;
+            BBAanalyse.posQuadruMin2 = posQuadruMin2;
             BBAanalyse.posBPMMin = posBPMMin;
+            BBAanalyse.posBPMMin2 = posBPMMin2;
             BBAanalyse.posQuadruFinalMin = posQuadruFinalMin;
             
-            BBAanalyse.kickMinTune = kickMinTune;
-            BBAanalyse.functionMinTune = functionMinTune;
+            BBAanalyse.kickMinTune = 0;
+            BBAanalyse.functionMinTune = 0;
             BBAanalyse.posQuadruMinTune = posQuadruMinTune;
             BBAanalyse.posBPMMinTune = posBPMMinTune;
             BBAanalyse.posQuadruFinalMinTune = posQuadruFinalMinTune;
@@ -114,36 +150,69 @@ for m=1:1 %for m=0:length(machine)
             functionMin = M;
 
             posQuadruMin = [];
-            posQuadruMinTune = [];
+            posQuadruMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posQuadru(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMin = [posQuadruMin; interp(I)];
-                var = posQuadruTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posQuadruMinTune = [posQuadruMinTune; interp(It)];
+            end
+            
+            posQuadruMin2 = [];
+            for i=1:6
+                if (i == 3)
+                    var = posQuadru(i,:);
+                    p = polyfit(transpose(var), meritfunction, 2);
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    %{
+                    figure; plot(var, meritfunction, 'ko');
+                    hold on;
+                    plot(vVar, f);
+                    hold off;
+                    %}
+                    [Ma,Ia] = min(f);
+                    %posQuadruMin = [posQuadruMin; vVar(I)];
+                    posQuadruMin2 = [posQuadruMin2; -p(2)/(2*p(1))];
+                else
+                    posQuadruMin2 = [posQuadruMin2; 0];
+                end
             end
             
             posBPMMin = [];
-            posBPMMinTune = [];
+            posBPMMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posBPM(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMin = [posBPMMin; interp(I)];
-                var = posBPMTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posBPMMinTune = [posBPMMinTune; interp(It)];
+            end
+            
+            posBPMMin2 = [];
+            for i=1:6
+                if (i == 3)
+                    var = posBPM(i,:);
+                    p = polyfit(transpose(var), meritfunction, 2);
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    %{
+                    figure; plot(var, meritfunction, 'ko');
+                    hold on;
+                    plot(vVar, f);
+                    hold off;
+                    %}
+                    [Ma,Ia] = min(f);
+                    %posQuadruMin = [posQuadruMin; vVar(I)];
+                    posBPMMin2 = [posBPMMin2; -p(2)/(2*p(1))];
+                else
+                    posBPMMin2 = [posBPMMin2; 0];
+                end
             end
             
             posQuadruFinalMin = [];
-            posQuadruFinalMinTune = [];
+            posQuadruFinalMinTune = [0; 0; 0; 0; 0; 0];
             for i=1:6
                 var = posQuadruFinal(i,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMin = [posQuadruFinalMin; interp(I)];
-                var = posQuadruFinalTune(i,:);
-                interp = interp1(kicks,var,vkicks,'spline');
-                posQuadruFinalMinTune = [posQuadruFinalMinTune; interp(It)];
             end
             
             BBAanalyse = [];
@@ -151,11 +220,13 @@ for m=1:1 %for m=0:length(machine)
             BBAanalyse.kickMin = kickMin;
             BBAanalyse.functionMin = functionMin;
             BBAanalyse.posQuadruMin = posQuadruMin;
+            BBAanalyse.posQuadruMin2 = posQuadruMin2;
             BBAanalyse.posBPMMin = posBPMMin;
+            BBAanalyse.posBPMMin2 = posBPMMin2;
             BBAanalyse.posQuadruFinalMin = posQuadruFinalMin;
             
-            BBAanalyse.kickMinTune = kickMinTune;
-            BBAanalyse.functionMinTune = functionMinTune;
+            BBAanalyse.kickMinTune = 0;
+            BBAanalyse.functionMinTune = 0;
             BBAanalyse.posQuadruMinTune = posQuadruMinTune;
             BBAanalyse.posBPMMinTune = posBPMMinTune;
             BBAanalyse.posQuadruFinalMinTune = posQuadruFinalMinTune;
@@ -175,7 +246,7 @@ for m=1:1 %for m=0:length(machine)
             fprintf('Índice do Quadrupolo mais perto: %d\n', quadru);
             fprintf('É Skew: %d\n', is_skew);
             fprintf('É Sextupolo: %d\n', is_sextupole);
-            fprintf('ERRO BBA: (%d , %d)\n', abs(BBAanalyseX.posBPMMin(1) - ring{quadru}.T2(1)), abs(BBAanalyseX.posBPMMin(3) - ring{quadru}.T2(3)));
+            fprintf('ERRO BBA: (%d , %d)\n', abs(BBAanalyseX.posBPMMin(1) - ring{quadru}.T2(1))*1000000, abs(BBAanalyseX.posBPMMin(3) - ring{quadru}.T2(3))*1000000);
             fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
             fprintf('--------------------\n');
         end
@@ -333,8 +404,8 @@ for m=1:1 %for m=0:length(machine)
             K = ring{quadru}.PolynomB(2);
             Kp = ring{quadru}.PolynomA(2);
             S = ring{quadru}.PolynomB(3);
-            x0 = Gy*L*L/24 + (Gy*K-Gx*Kp)*L*L*L*L/576;
-            y0 = -Gx*L*L/24 + (Gy*Kp+Gx*K)*L*L*L*L/576;
+            x0 = Gy*L*L/24 + 7*(Gy*K-Gx*Kp)*L*L*L*L/5760;
+            y0 = -Gx*L*L/24 + 7*(Gy*Kp+Gx*K)*L*L*L*L/5760;
             x1 = -(1/8)*L*L*Gy + (1/384)*L*L*L*L*(Gx*Kp-Gy*K);
             y1 = (1/8)*L*L*Gx - (1/384)*L*L*L*L*(Gy*Kp+Gx*K);
             x2X = (1/2)*L*x0lX - (1/48)*L*L*L*(y0lX*Kp+x0lX*K);

@@ -17,6 +17,10 @@ function BBAresult = BBAscan_sext(ring,family_data,ind,bpm,corr,dir,is_skew,kick
     for n = -range:range
         ringTemp = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corr,dir) + n*step_kick, corr, dir);
         ringDeltaTemp = lnls_set_kickangle(ringDelta, lnls_get_kickangle(ringDelta,corr,dir) + n*step_kick, corr, dir);
+        
+        %ringTemp = lnls_set_kickangle(setRingDelta_sext(ring,ind,0,is_skew,is_sextupole), lnls_get_kickangle(ring,corr,dir) + n*step_kick, corr, dir);
+        %ringDeltaTemp = lnls_set_kickangle(setRingDelta_sext(ring,ind,DeltaK,is_skew,is_sextupole), lnls_get_kickangle(ringDelta,corr,dir) + n*step_kick, corr, dir);
+        
         kicks = [kicks; n*step_kick];
         orbitTemp = findorbit6(ringTemp,1:length(ringTemp));
         orbitDeltaTemp = findorbit6(ringDeltaTemp,family_data.BPM.ATIndex);

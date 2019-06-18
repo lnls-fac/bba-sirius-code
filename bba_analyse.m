@@ -1,19 +1,23 @@
 caminho_arquivos = '../bba-sirius-data/';
 folder = 'sext';
 
-range = 10; % quantidade de valores nas corretoras
-random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
+range = 12; % quantidade de valores nas corretoras
+random_error = true; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % quantidade de pontos da interpolação
 
+%totalBPM = length(list_bpm);
+totalBPM = length(list_bpm);
+
+
 for m=0:0 %for m=0:length(machine)
-    for recursao=0:1
+    for recursao=1:1
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
             ring = the_ring;
         else
             ring = machine{m};
         end
-        for i=1:length(list_bpm)
+        for i=1:totalBPM
             t0 = datenum(datetime('now'));
             
             bpm = list_bpm(i); %pega um bpm da lista de BPMs para fazer BBA
@@ -58,35 +62,135 @@ for m=0:0 %for m=0:length(machine)
             kickMinTune = vkicks(It);
             functionMinTune = Mt;
             
+            %regressão nos kicks (parece que funciona também)
+            if(strcmp(folder,'sext') && is_sextupole == true)
+            	p = polyfit(kicks, meritfunction, 4);
+            else
+            	p = polyfit(kicks, meritfunction, 2);
+            end
+            f = polyval(p,transpose(vkicks));
+            if(strcmp(folder,'sext') && is_sextupole == true)
+            	r = roots(polyder(p))
+            	r2 = r(imag(r) == 0&real(r)<max(kicks)&real(r)>min(kicks));
+            	kickMin2 = mean(r2);
+            else
+            	kickMin2 = -p(2)/(2*p(1));
+            end
+            functionMin2 = polyval(p,kickMin2);
+            %{
+            figure; plot(kicks, meritfunction, 'ko');
+            hold on;
+            plot(vkicks, f);
+            plot(vkicks, interp);
+            plot(kickMin2, functionMin2, '*')
+            plot(kickMin, functionMin, '*')
+            hold off;
+            %}
+            
+            posQuadruMin2 = [];
+            for j=1:6
+                if (j == 1)
+                    var = posQuadru(j,:);
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        p = polyfit(transpose(var), meritfunction, 4);
+                    else
+                        p = polyfit(transpose(var), meritfunction, 2);
+                    end
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    interp2 = interp1(var,meritfunction,vVar,'spline');
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
+                        value = mean(r2);
+                        posQuadruMin2 = [posQuadruMin2; value];
+                    else
+                        value = -p(2)/(2*p(1));
+                        posQuadruMin2 = [posQuadruMin2; value];
+                    end
+                    %{
+                    Ma = polyval(p,value);
+                    [Mb,Ib] = min(interp2);
+                    figure; plot(var - ring{quadru}.T2(1), meritfunction, 'ko');
+                    hold on;
+                    plot(vVar - ring{quadru}.T2(1), f);
+                    plot(vVar- ring{quadru}.T2(1), interp2);
+                    plot(value - ring{quadru}.T2(1), Ma, '*')
+                    plot(vVar(Ib)- ring{quadru}.T2(1), Mb, '*')
+                    hold off;
+                    %}
+                else
+                    posQuadruMin2 = [posQuadruMin2; 0];
+                end
+            end
+
+            posBPMMin2 = [];
+            for j=1:6
+                if (j == 1)
+                    var = posBPM(j,:);
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        p = polyfit(transpose(var), meritfunction, 4);
+                    else
+                        p = polyfit(transpose(var), meritfunction, 2);
+                    end
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    interp2 = interp1(var,meritfunction,vVar,'spline');
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
+                        value = mean(r2);
+                        posBPMMin2 = [posBPMMin2; value];
+                    else
+                        value = -p(2)/(2*p(1));
+                        posBPMMin2 = [posBPMMin2; value];
+                    end
+                    %{
+                    Ma = polyval(p,value);
+                    [Mb,Ib] = min(interp2);
+                    figure; plot(var - ring{quadru}.T2(1), meritfunction, 'ko');
+                    hold on;
+                    plot(vVar - ring{quadru}.T2(1), f);
+                    plot(vVar- ring{quadru}.T2(1), interp2);
+                    plot(value - ring{quadru}.T2(1), Ma, '*')
+                    plot(vVar(Ib)- ring{quadru}.T2(1), Mb, '*')
+                    hold off;
+                    %}
+                    
+                else
+                    posBPMMin2 = [posBPMMin2; 0];
+                end
+            end
+                
             posQuadruMin = [];
             posQuadruMinTune = [];
-            for i=1:6
-                var = posQuadru(i,:);
+            for j=1:6
+                var = posQuadru(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMin = [posQuadruMin; interp(I)];
-                var = posQuadruTune(i,:);
+                var = posQuadruTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMinTune = [posQuadruMinTune; interp(It)];
             end
             
             posBPMMin = [];
             posBPMMinTune = [];
-            for i=1:6
-                var = posBPM(i,:);
+            for j=1:6
+                var = posBPM(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMin = [posBPMMin; interp(I)];
-                var = posBPMTune(i,:);
+                var = posBPMTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMinTune = [posBPMMinTune; interp(It)];
             end
             
             posQuadruFinalMin = [];
             posQuadruFinalMinTune = [];
-            for i=1:6
-                var = posQuadruFinal(i,:);
+            for j=1:6
+                var = posQuadruFinal(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMin = [posQuadruFinalMin; interp(I)];
-                var = posQuadruFinalTune(i,:);
+                var = posQuadruFinalTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMinTune = [posQuadruFinalMinTune; interp(It)];
             end
@@ -97,6 +201,8 @@ for m=0:0 %for m=0:length(machine)
             BBAanalyse.functionMin = functionMin;
             BBAanalyse.posQuadruMin = posQuadruMin;
             BBAanalyse.posBPMMin = posBPMMin;
+            BBAanalyse.posQuadruMin2 = posQuadruMin2;
+            BBAanalyse.posBPMMin2 = posBPMMin2;
             BBAanalyse.posQuadruFinalMin = posQuadruFinalMin;
             
             BBAanalyse.kickMinTune = kickMinTune;
@@ -139,35 +245,109 @@ for m=0:0 %for m=0:length(machine)
             kickMinTune = vkicks(It);
             functionMinTune = Mt;
             
+            posQuadruMin2 = [];
+            for j=1:6
+                if (j == 3)
+                    var = posQuadru(j,:);
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        p = polyfit(transpose(var), meritfunction, 4);
+                    else
+                        p = polyfit(transpose(var), meritfunction, 2);
+                    end
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    interp2 = interp1(var,meritfunction,vVar,'spline');
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
+                        value = mean(r2);
+                        posQuadruMin2 = [posQuadruMin2; value];
+                    else
+                        value = -p(2)/(2*p(1));
+                        posQuadruMin2 = [posQuadruMin2; value];
+                    end
+                    %{
+                    Ma = polyval(p,value);
+                    [Mb,Ib] = min(interp2);
+                    figure; plot(var - ring{quadru}.T2(3), meritfunction, 'ko');
+                    hold on;
+                    plot(vVar - ring{quadru}.T2(3), f);
+                    plot(vVar- ring{quadru}.T2(3), interp2);
+                    plot(value - ring{quadru}.T2(3), Ma, '*')
+                    plot(vVar(Ib)- ring{quadru}.T2(3), Mb, '*')
+                    hold off;
+                    %}
+                else
+                    posQuadruMin2 = [posQuadruMin2; 0];
+                end
+            end
+            
+            posBPMMin2 = [];
+            for j=1:6
+                if (j == 3)
+                    var = posBPM(j,:);
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        p = polyfit(transpose(var), meritfunction, 4);
+                    else
+                        p = polyfit(transpose(var), meritfunction, 2);
+                    end
+                    vVar = min(var):(max(var)-min(var))/interp_num:max(var);
+                    f = polyval(p,transpose(vVar));
+                    interp2 = interp1(var,meritfunction,vVar,'spline');
+                    if(strcmp(folder,'sext') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
+                        value = mean(r2);
+                        posBPMMin2 = [posBPMMin2; value];
+                    else
+                        value = -p(2)/(2*p(1));
+                        posBPMMin2 = [posBPMMin2; value];
+                    end
+                    %{
+                    Ma = polyval(p,value);
+                    [Mb,Ib] = min(interp2);
+                    figure; plot(var - ring{quadru}.T2(3), meritfunction, 'ko');
+                    hold on;
+                    plot(vVar - ring{quadru}.T2(3), f);
+                    plot(vVar- ring{quadru}.T2(3), interp2);
+                    plot(value - ring{quadru}.T2(3), Ma, '*')
+                    plot(vVar(Ib)- ring{quadru}.T2(3), Mb, '*')
+                    hold off;
+                    %}
+                else
+                    posBPMMin2 = [posBPMMin2; 0];
+                end
+            end
+            
             posQuadruMin = [];
             posQuadruMinTune = [];
-            for i=1:6
-                var = posQuadru(i,:);
+            for j=1:6
+                var = posQuadru(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMin = [posQuadruMin; interp(I)];
-                var = posQuadruTune(i,:);
+                var = posQuadruTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruMinTune = [posQuadruMinTune; interp(It)];
             end
             
             posBPMMin = [];
             posBPMMinTune = [];
-            for i=1:6
-                var = posBPM(i,:);
+            for j=1:6
+                var = posBPM(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMin = [posBPMMin; interp(I)];
-                var = posBPMTune(i,:);
+                var = posBPMTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posBPMMinTune = [posBPMMinTune; interp(It)];
             end
             
             posQuadruFinalMin = [];
             posQuadruFinalMinTune = [];
-            for i=1:6
-                var = posQuadruFinal(i,:);
+            for j=1:6
+                var = posQuadruFinal(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMin = [posQuadruFinalMin; interp(I)];
-                var = posQuadruFinalTune(i,:);
+                var = posQuadruFinalTune(j,:);
                 interp = interp1(kicks,var,vkicks,'spline');
                 posQuadruFinalMinTune = [posQuadruFinalMinTune; interp(It)];
             end
@@ -178,6 +358,8 @@ for m=0:0 %for m=0:length(machine)
             BBAanalyse.functionMin = functionMin;
             BBAanalyse.posQuadruMin = posQuadruMin;
             BBAanalyse.posBPMMin = posBPMMin;
+            BBAanalyse.posQuadruMin2 = posQuadruMin2;
+            BBAanalyse.posBPMMin2 = posBPMMin2;
             BBAanalyse.posQuadruFinalMin = posQuadruFinalMin;
             
             BBAanalyse.kickMinTune = kickMinTune;
@@ -220,6 +402,11 @@ for m=0:0 %for m=0:length(machine)
         desvQuadruY = {};
         desvBPMX = {};
         desvBPMY = {};
+
+        desvQuadruX2 = {};
+        desvQuadruY2 = {};
+        desvBPMX2 = {};
+        desvBPMY2 = {};
         
         desvQuadruXtune = {};
         desvQuadruYtune = {};
@@ -259,6 +446,11 @@ for m=0:0 %for m=0:length(machine)
             desvQuadruY{i} = [];
             desvBPMX{i} = [];
             desvBPMY{i} = [];
+
+            desvQuadruX2{i} = [];
+            desvQuadruY2{i} = [];
+            desvBPMX2{i} = [];
+            desvBPMY2{i} = [];
             
             desvQuadruXtune{i} = [];
             desvQuadruYtune{i} = [];
@@ -287,8 +479,7 @@ for m=0:0 %for m=0:length(machine)
         end
         
         t0 = datenum(datetime('now'));
-        %for i=1:length(alist_bpm)
-        for i=1:length(alist_bpm)
+        for i=1:totalBPM
             bpm = alist_bpm(i);
             quadru = alist_quadru(i);
             is_skew = isSkew(family_data,quadru);
@@ -334,6 +525,15 @@ for m=0:0 %for m=0:length(machine)
             posBPMMin = data.BBAanalyseY.posBPMMin*pot;
             desvQuadruY{index} = [desvQuadruY{index}, posQuadruMin - posCenterQuadru];
             desvBPMY{index} = [desvBPMY{index}, posBPMMin - posCenterQuadru];
+
+            posQuadruMin2 = data.BBAanalyseX.posQuadruMin2*pot;
+            posBPMMin2 = data.BBAanalyseX.posBPMMin2*pot;
+            desvQuadruX2{index} = [desvQuadruX2{index}, posQuadruMin2 - posCenterQuadru];
+            desvBPMX2{index} = [desvBPMX2{index}, posBPMMin2 - posCenterQuadru];
+            posQuadruMin2 = data.BBAanalyseY.posQuadruMin2*pot;
+            posBPMMin2 = data.BBAanalyseY.posBPMMin2*pot;
+            desvQuadruY2{index} = [desvQuadruY2{index}, posQuadruMin2 - posCenterQuadru];
+            desvBPMY2{index} = [desvBPMY2{index}, posBPMMin2 - posCenterQuadru];
             
             posQuadruMinTune = data.BBAanalyseX.posQuadruMinTune*pot;
             posBPMMinTune = data.BBAanalyseX.posBPMMinTune*pot;
@@ -354,28 +554,16 @@ for m=0:0 %for m=0:length(machine)
             y0lX = data.BBAanalyseX.posQuadruMin(4);
             x0lY = data.BBAanalyseY.posQuadruMin(2);
             y0lY = data.BBAanalyseY.posQuadruMin(4);
+            if(is_sextupole == true)
+                fprintf('%d %d %d %d\n', x0lX, y0lX, x0lY, y0lY);
+            end
             Gx = ring{quadru}.PolynomA(1);
             Gy = ring{quadru}.PolynomB(1);
             K = ring{quadru}.PolynomB(2);
             Kp = ring{quadru}.PolynomA(2);
             S = ring{quadru}.PolynomB(3);
-            x0 = Gy*L*L/24 + (Gy*K-Gx*Kp)*L*L*L*L/576;
-            y0 = -Gx*L*L/24 + (Gy*Kp+Gx*K)*L*L*L*L/576;
-            x1 = -(1/8)*L*L*Gy + (1/384)*L*L*L*L*(Gx*Kp-Gy*K);
-            y1 = (1/8)*L*L*Gx - (1/384)*L*L*L*L*(Gy*Kp+Gx*K);
-            x2X = (1/2)*L*x0lX - (1/48)*L*L*L*(y0lX*Kp+x0lX*K);
-            y2X = (1/2)*L*y0lX - (1/48)*L*L*L*(x0lX*Kp-y0lX*K);
-            x2Y = (1/2)*L*x0lY - (1/48)*L*L*L*(y0lY*Kp+x0lY*K);
-            y2Y = (1/2)*L*y0lY - (1/48)*L*L*L*(x0lY*Kp-y0lY*K);
-            x3 = -D*(Gy*L)/2;
-            y3 = D*(Gx*L)/2;
-            x4X = D*x0lX - (1/8)*D*L*L*(y0lX*Kp+x0lX*K);
-            y4X = D*y0lX - (1/8)*D*L*L*(x0lX*Kp-y0lX*K);
-            x4Y = D*x0lY - (1/8)*D*L*L*(y0lY*Kp+x0lY*K);
-            y4Y = D*y0lY - (1/8)*D*L*L*(x0lY*Kp-y0lY*K);
-
-            x0s = -L*y0lX/(2*sqrt(3));
-            y0s = L*x0lY/(2*sqrt(3));
+            x0 = Gy*L*L/24 + (Gy*K-Gx*Kp)*L*L*L*L/5760;
+            y0 = -Gx*L*L/24 + (Gy*Kp+Gx*K)*L*L*L*L/5760;
             x1 = -(1/8)*L*L*Gy + (1/384)*L*L*L*L*(Gx*Kp-Gy*K);
             y1 = (1/8)*L*L*Gx - (1/384)*L*L*L*L*(Gy*Kp+Gx*K);
             x2X = (1/2)*L*x0lX - (1/48)*L*L*L*(y0lX*Kp+x0lX*K);
@@ -398,7 +586,7 @@ for m=0:0 %for m=0:length(machine)
                 correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
-            if (strcmp(folder,'sext') || strcmp(folder,'sextt')) && is_sextupole == false
+            if (strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == false
                 correcao1x{index} = [correcao1x{index}, pot*x0];
                 correcao1y{index} = [correcao1y{index}, pot*y0];
                 correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
@@ -408,15 +596,15 @@ for m=0:0 %for m=0:length(machine)
                 correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
-            if (strcmp(folder,'sext') || strcmp(folder,'sextt')) && is_sextupole == true
-                correcao1x{index} = [correcao1x{index}, pot*x0s];
-                correcao1y{index} = [correcao1y{index}, pot*y0s];
-                correcao2x{index} = [correcao2x{index}, pot*0 + pot*0];
-                correcao2y{index} = [correcao2y{index}, pot*0 + pot*0];
-                correcao3x_X{index} = [correcao3x_X{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3y_X{index} = [correcao3y_X{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(0 + 0)];
-                correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(0 + 0)];
+            if (strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == true
+                correcao1x{index} = [correcao1x{index}, pot*x0];
+                correcao1y{index} = [correcao1y{index}, pot*y0];
+                correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
+                correcao2y{index} = [correcao2y{index}, pot*y1 + pot*y3];
+                correcao3x_X{index} = [correcao3x_X{index}, pot*sign(bpm-quadru)*(x2X + x4X)];
+                correcao3y_X{index} = [correcao3y_X{index}, pot*sign(bpm-quadru)*(y2X + y4X)];
+                correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
+                correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
             
             if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
@@ -445,7 +633,7 @@ for m=0:0 %for m=0:length(machine)
         fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
         
         string = [caminho_arquivos folder '/' 'Graficos' '_' 'M' num2str(m) '_' num2str(recursao) 'r' '_' num2str(range) '_' num2str(random_error) '_' num2str(interp_num) '_' 'data.mat'];
-        save(string, 'kicksX','kicksY','meritfunctionX','meritfunctionY','functionMinX','functionMinY','desvQuadruX','desvQuadruY','desvBPMX','desvBPMY','correcao1x','correcao1y','correcao2x','correcao2y','correcao3x_X','correcao3y_X','correcao3x_Y','correcao3y_Y','desvQuadruXtune','desvQuadruYtune','desvBPMXtune','desvBPMYtune');
+        save(string, 'kicksX','kicksY','meritfunctionX','meritfunctionY','functionMinX','functionMinY','desvQuadruX','desvQuadruY','desvBPMX','desvBPMY','correcao1x','correcao1y','correcao2x','correcao2y','correcao3x_X','correcao3y_X','correcao3x_Y','correcao3y_Y','desvQuadruXtune','desvQuadruYtune','desvBPMXtune','desvBPMYtune','desvQuadruX2','desvQuadruY2','desvBPMX2','desvBPMY2');
     end
 
 end

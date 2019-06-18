@@ -45,6 +45,8 @@ function BBAresult = BBAscan(ring,family_data,ind,bpm,corr,dir,is_skew,kickMax,r
             f = f + dx*dx + dy*dy;
         end
         f = f/length(family_data.BPM.ATIndex);
+        %ef = [2/sqrt(N)]*e*sqrt(f), N=160 , e=0.1um , ef:erro de f , 2/sqrt(160)=0.16
+        %ef/f*100 = 100*[2/sqrt(N)]*[e/sqrt(f)]
         meritfunction = [meritfunction; f];
         %Obtém variáveis internas da simulação para analisar o BBA
         %E a medida do BPM próximo ao Quadrupolo

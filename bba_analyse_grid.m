@@ -1,10 +1,10 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'grid';
+folder = 'gridsext';
 
 %configuracoes do arquivo a ser carregado
 m = 1;
 
-range = 10;
+range = 12;
 random_error = false;
 steps_interp = 5000;
 

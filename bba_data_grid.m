@@ -1,9 +1,9 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'grid';
+folder = 'gridsext';
 %selecionar a pasta 'gridsext' automaticamente muda o algoritmo para
 %usar a força de sextupolos onde for possível
 
-range = 10; % quantidade de valores nas corretoras
+range = 12; % quantidade de valores nas corretoras
 random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 
 for m=1:1 %for m=0:length(machine)
@@ -28,7 +28,7 @@ for m=1:1 %for m=0:length(machine)
         %encontra as melhores corretoras para o BBA, o kick máximo
         %delas e o DeltaK ideal para o quadrupolo
         corrs = [findBestCorr(family_data,twi,quadru,'x') findBestCorr(family_data,twi,quadru,'y')];
-        kicksMax = [selectMaxKick(twi,quadru,corrs(1),'x') selectMaxKick(twi,quadru,corrs(2),'y')];
+        kicksMax = [selectMaxKick(twi,quadru,corrs(1),'x')/20 selectMaxKick(twi,quadru,corrs(2),'y')/20];
         %DeltaK depende se é no termo de quadrupolo ou de sextupolo
         %DeltaK também depende de qual a função de mérito do BBA
         if strcmp(folder,'gridsext') 

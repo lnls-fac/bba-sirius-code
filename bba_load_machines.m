@@ -276,16 +276,22 @@ legend(sigmy,{'Quadrupolo','QS','Sextupolo + QS'});
 line(sigmx, [0 600],[10 10],'LineWidth',3);
 line(sigmy, [0 600],[10 10],'LineWidth',3);
 
-
-figure('NumberTitle', 'off', 'Name', ['teste']);
-test = subplot(1,1,1);
-hold(test,'on');
-for i=1:3
-    %plot((1/sqrt(twi.betax(listquadru{i}))).*sqrt(1 + (1/4)*twi.alphax(listquadru{i}).*twi.alphax(listquadru{i})) + twi.etaxl(listquadru{i}), sigmaX{i}.*transpose(cte{i}), l(i,:));
-    %plot(abs(twi.etax(listquadru{i})), sigmaX{i}.*transpose(cte{i}), l(i,:));
-    %plot((1/sqrt(twi.betay(listquadru{i}))).*sqrt(1 + (1/4)*twi.alphay(listquadru{i}).*twi.alphay(listquadru{i})), sigmaY{i}.*transpose(cte{i}), l(i,:));
-    %plot(twi.alphax(listquadru{i}), (sigmaX{i}.*transpose(cte{i})).*transpose(sqrt(twi.betax(listquadru{i}))), l(i,:));
-    %plot(sqrt(twi.betay(listquadru{i})), sigmaY{i}.*transpose(cte{i}), l(i,:));
-    plot(1./sqrt(twi.betax(listquadru{i})), sigmaX{i}.*transpose(cte{i}), l(i,:));
-    plot(twi.alphax(listquadru{i}), sigmaX{i}.*transpose(cte{i}), l(i,:));
+%Cria os espaços para os gráficos na terceira figura
+if(corrigir == true)
+    figure('NumberTitle', 'off', 'Name', [num2str(recursao) 'r - Gráficos Análise BBA Média e Sigma Corrigido']);
+else
+    figure('NumberTitle', 'off', 'Name', [num2str(recursao) 'r - Gráficos Análise BBA Média e Sigma']);
 end
+medx = subplot(1,1,1);
+medx.FontSize = size_num;
+hold(medx,'on');
+xlabel(medx,'posicao - s (m)','FontSize',size_num);
+ylabel(medx,'Erro estimado do BBA (um)','FontSize',size_num);
+for i=1:3
+    width_line = 2;
+    plot(medx,findsposOff(ring,listquadru{i}),sigmaX{i},[l(i,:) '-'], 'linewidth', width_line);
+    %sigmaX{i}.*transpose(cte{i})
+    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
+    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
+end
+legend(medx,{'Quadrupolo','QS','Sextupolo + QS'});
