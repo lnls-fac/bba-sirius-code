@@ -1,5 +1,5 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
+folder = 'sext2';
 %1) 'plusK' é o BBA normal com o Kscan junto e ajustando o DeltaK
 %2) 'plusKt' é o BBA normal com o Kscan junto mas sem ajustar o DeltaK
 %3) selecionar a pasta 'sext' automaticamente muda o algoritmo para
@@ -7,17 +7,22 @@ folder = 'sext';
 %3) 'sextt' é o sextupolo sem ajustar o DeltaK
 %3) 'sextder' é o sextupolo mas partido de força zero no sextupolo para dar
 %delta
+%4) O indice 2 no final é quando usamos regressão e não spline para kickmin
+% 1 - 16 / 5 - 14 / 10 - 12
+% 10 -> amplitude de 12 e força 10x maior para sextupolos 'sext2'
+% 11 -> amplitude de 12 e força 15x maior para sextupolos 'sext2'
 
-range = 12; % quantidade de valores nas corretoras
-random_error = true; % define se colocaremos erros aleatórios nos BPM's ou não
+range = 11; % quantidade de valores nas corretoras
+random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % numero de pontos calculados na imperpolação
 
 %totalBPM = length(list_bpm);
 totalBPM = length(list_bpm);
+%erro no décimo bpm
 
 for m=0:1 %for m=0:length(machine)
-    for recursao=0:1
-        for i=1:totalBPM
+    for recursao=0:0
+        for i=1:totalBPM %for i=1:totalBPM
             t0 = datenum(datetime('now'));
             %escolhe o anel e liga a cavidade de RF e a emissão de radiação
             if(m==0)
@@ -41,7 +46,7 @@ for m=0:1 %for m=0:length(machine)
             kicksMax = [selectMaxKick(twi,quadru,corrs(1),'x')/10 selectMaxKick(twi,quadru,corrs(2),'y')/10];
             %DeltaK depende se é no termo de quadrupolo ou de sextupolo
             %DeltaK também depende de qual a função de mérito do BBA
-            if strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder') 
+            if strcmp(folder,'sext') || strcmp(folder,'sext2') || strcmp(folder,'sextt') || strcmp(folder,'sextder') 
                 DeltaKaux = [selectDeltaK_sext(the_ring,family_data,twi,quadru,'x',is_sextupole) selectDeltaK_sext(the_ring,family_data,twi,quadru,'y',is_sextupole)];
             else
                 DeltaKaux = [selectDeltaK(the_ring,family_data,twi,quadru,'x',is_skew) selectDeltaK(the_ring,family_data,twi,quadru,'y',is_skew)];
@@ -55,7 +60,7 @@ for m=0:1 %for m=0:length(machine)
 
             %Verifica se o DeltaK escolhido não ultrapassa os limites da
             % especificação
-            if strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder') 
+            if strcmp(folder,'sext') || strcmp(folder,'sext2') || strcmp(folder,'sextt') || strcmp(folder,'sextder') 
                 DeltaKlimX = getDeltaKlimit_sext(DeltaK(1), is_skew, is_sextupole, ring, quadru);
                 DeltaKlimY = getDeltaKlimit_sext(DeltaK(2), is_skew, is_sextupole, ring, quadru);
                 DeltaKlim = [DeltaKlimX DeltaKlimY];
@@ -67,9 +72,13 @@ for m=0:1 %for m=0:length(machine)
             if strcmp(folder,'plusKt') || strcmp(folder,'sextt')
                 DeltaKlim = DeltaK; %desfaz a conta do DeltaK limite
             end
+            if strcmp(folder,'sext2') && is_sextupole
+            	DeltaKlim = DeltaK*15;
+                test = DeltaKlim*100/abs(ring{quadru}.PolynomB(3))
+            end
 
             if(recursao == 0)
-                if strcmp(folder,'sext') || strcmp(folder,'sextt') 
+                if strcmp(folder,'sext') || strcmp(folder,'sext2') || strcmp(folder,'sextt') 
                 	BBAresultX = BBAscan_sext(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaKlim(1),random_error,is_sextupole);
                     BBAresultXtune = BBAresultX;
                     BBAresultY = BBAscan_sext(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaKlim(2),random_error,is_sextupole);
@@ -92,9 +101,26 @@ for m=0:1 %for m=0:length(machine)
                 kicks = data.BBAresultX.kicks;
                 meritfunction = data.BBAresultX.meritfunction;
                 vkicks = min(kicks):(max(kicks)-min(kicks))/interp_num:max(kicks);
-                interp = interp1(kicks,meritfunction,vkicks,'spline');
-                [M,I] = min(interp);
-                kickMin = vkicks(I);
+                if strcmp(folder,'plusK2') || strcmp(folder,'sext2')
+                    if(strcmp(folder,'sext2') && is_sextupole == true)
+                        %p = polyfit(kicks, meritfunction, 4);
+                        p = fitQuartic(kicks, meritfunction);
+                    else
+                        p = polyfit(kicks, meritfunction, 2);
+                    end
+                    f = polyval(p,transpose(vkicks));
+                    if(strcmp(folder,'sext2') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(kicks)&real(r)>min(kicks));
+                        kickMin = mean(r2);
+                    else
+                        kickMin = -p(2)/(2*p(1));
+                    end
+                else
+                    interp = interp1(kicks,meritfunction,vkicks,'spline');
+                    [M,I] = min(interp);
+                    kickMin = vkicks(I);
+                end 
                 tune1 = data.BBAresultXtune.deltaTune1;
                 tune2 = data.BBAresultXtune.deltaTune2;
                 desvTune = tune1.*tune1 + tune2.*tune2;
@@ -103,7 +129,7 @@ for m=0:1 %for m=0:length(machine)
                 kickMinTune = vkicks(It);
                 ring = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + kickMin, corrs(1), 'x');
                 ringTune = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(1),'x') + kickMinTune, corrs(1), 'x');
-                if strcmp(folder,'sext') || strcmp(folder,'sextt')
+                if strcmp(folder,'sext') || strcmp(folder,'sext2') || strcmp(folder,'sextt')
                     BBAresultY = BBAscan_sext(ring,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaKlim(2),random_error,is_sextupole);
                     BBAresultYtune = BBAscan_sext(ringTune,family_data,quadru,bpm,corrs(2),'y',is_skew,kicksMax(2),range,DeltaKlim(2),random_error,is_sextupole);
                 elseif strcmp(folder,'sextder')
@@ -116,9 +142,26 @@ for m=0:1 %for m=0:length(machine)
                 kicks = BBAresultY.kicks;
                 meritfunction = BBAresultY.meritfunction;
                 vkicks = min(kicks):(max(kicks)-min(kicks))/interp_num:max(kicks);
-                interp = interp1(kicks,meritfunction,vkicks,'spline');
-                [M,I] = min(interp);
-                kickMin = vkicks(I);
+                if strcmp(folder,'plusK2') || strcmp(folder,'sext2')
+                    if(strcmp(folder,'sext2') && is_sextupole == true)
+                        %p = polyfit(kicks, meritfunction, 4);
+                        p = fitQuartic(kicks, meritfunction);
+                    else
+                        p = polyfit(kicks, meritfunction, 2);
+                    end
+                    f = polyval(p,transpose(vkicks));
+                    if(strcmp(folder,'sext2') && is_sextupole == true)
+                        r = roots(polyder(p));
+                        r2 = r(imag(r) == 0&real(r)<max(kicks)&real(r)>min(kicks));
+                        kickMin = mean(r2);
+                    else
+                        kickMin = -p(2)/(2*p(1));
+                    end
+                else
+                    interp = interp1(kicks,meritfunction,vkicks,'spline');
+                    [M,I] = min(interp);
+                    kickMin = vkicks(I);
+                end
                 tune1 = data.BBAresultYtune.deltaTune1;
                 tune2 = data.BBAresultYtune.deltaTune2;
                 desvTune = tune1.*tune1 + tune2.*tune2;
@@ -127,7 +170,7 @@ for m=0:1 %for m=0:length(machine)
                 kickMinTune = vkicks(It);
                 ring = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(2),'y') + kickMin, corrs(2), 'y');
                 ringTune = lnls_set_kickangle(ring, lnls_get_kickangle(ring,corrs(2),'y') + kickMinTune, corrs(2), 'y');
-                if strcmp(folder,'sext') || strcmp(folder,'sextt')
+                if strcmp(folder,'sext') || strcmp(folder,'sext2') || strcmp(folder,'sextt')
                     BBAresultX = BBAscan_sext(ring,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaKlim(1),random_error,is_sextupole);
                     BBAresultXtune = BBAscan_sext(ringTune,family_data,quadru,bpm,corrs(1),'x',is_skew,kicksMax(1),range,DeltaKlim(1),random_error,is_sextupole);
                 elseif strcmp(folder,'sextder')
@@ -139,7 +182,7 @@ for m=0:1 %for m=0:length(machine)
                 end
             end
             
-            if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
+            if strcmp(folder,'plusK') || strcmp(folder,'plusK2') || strcmp(folder,'plusKt')
                 if(recursao == 0)
                     ringAux = ring;
                 else

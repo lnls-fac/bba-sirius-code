@@ -1,7 +1,7 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
+folder = 'sext2';
 
-range = 12; % quantidade de valores nas corretoras
+range = 11; % quantidade de valores nas corretoras
 random_error = true; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % quantidade de pontos da interpolação
 
@@ -9,15 +9,15 @@ interp_num = 1000000; % quantidade de pontos da interpolação
 totalBPM = length(list_bpm);
 
 
-for m=0:0 %for m=0:length(machine)
-    for recursao=1:1
+for m=1:1 %for m=0:length(machine)
+    for recursao=0:0
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
             ring = the_ring;
         else
             ring = machine{m};
         end
-        for i=1:totalBPM
+        for i=1:totalBPM %for i=1:totalBPM
             t0 = datenum(datetime('now'));
             
             bpm = list_bpm(i); %pega um bpm da lista de BPMs para fazer BBA
@@ -63,14 +63,15 @@ for m=0:0 %for m=0:length(machine)
             functionMinTune = Mt;
             
             %regressão nos kicks (parece que funciona também)
-            if(strcmp(folder,'sext') && is_sextupole == true)
-            	p = polyfit(kicks, meritfunction, 4);
+            if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+            	%p = polyfit(kicks, meritfunction, 4);
+                p = fitQuartic(kicks, meritfunction, false);
             else
             	p = polyfit(kicks, meritfunction, 2);
             end
             f = polyval(p,transpose(vkicks));
-            if(strcmp(folder,'sext') && is_sextupole == true)
-            	r = roots(polyder(p))
+            if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+            	r = roots(polyder(p));
             	r2 = r(imag(r) == 0&real(r)<max(kicks)&real(r)>min(kicks));
             	kickMin2 = mean(r2);
             else
@@ -86,20 +87,20 @@ for m=0:0 %for m=0:length(machine)
             plot(kickMin, functionMin, '*')
             hold off;
             %}
-            
             posQuadruMin2 = [];
             for j=1:6
                 if (j == 1)
                     var = posQuadru(j,:);
-                    if(strcmp(folder,'sext') && is_sextupole == true)
-                        p = polyfit(transpose(var), meritfunction, 4);
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+                        %p = polyfit(transpose(var), meritfunction, 4);
+                        p = fitQuartic(transpose(var), meritfunction, false);
                     else
                         p = polyfit(transpose(var), meritfunction, 2);
                     end
                     vVar = min(var):(max(var)-min(var))/interp_num:max(var);
                     f = polyval(p,transpose(vVar));
                     interp2 = interp1(var,meritfunction,vVar,'spline');
-                    if(strcmp(folder,'sext') && is_sextupole == true)
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
                         r = roots(polyder(p));
                         r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
                         value = mean(r2);
@@ -128,15 +129,16 @@ for m=0:0 %for m=0:length(machine)
             for j=1:6
                 if (j == 1)
                     var = posBPM(j,:);
-                    if(strcmp(folder,'sext') && is_sextupole == true)
-                        p = polyfit(transpose(var), meritfunction, 4);
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+                        %p = polyfit(transpose(var), meritfunction, 4);
+                        p = fitQuartic(transpose(var), meritfunction, false);
                     else
                         p = polyfit(transpose(var), meritfunction, 2);
                     end
                     vVar = min(var):(max(var)-min(var))/interp_num:max(var);
                     f = polyval(p,transpose(vVar));
                     interp2 = interp1(var,meritfunction,vVar,'spline');
-                    if(strcmp(folder,'sext') && is_sextupole == true)
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
                         r = roots(polyder(p));
                         r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
                         value = mean(r2);
@@ -199,6 +201,8 @@ for m=0:0 %for m=0:length(machine)
             BBAanalyse.interp_num = interp_num;
             BBAanalyse.kickMin = kickMin;
             BBAanalyse.functionMin = functionMin;
+            BBAanalyse.kickMin2 = kickMin2;
+            BBAanalyse.functionMin2 = functionMin2;
             BBAanalyse.posQuadruMin = posQuadruMin;
             BBAanalyse.posBPMMin = posBPMMin;
             BBAanalyse.posQuadruMin2 = posQuadruMin2;
@@ -245,19 +249,46 @@ for m=0:0 %for m=0:length(machine)
             kickMinTune = vkicks(It);
             functionMinTune = Mt;
             
+            %regressão nos kicks (parece que funciona também)
+            if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+            	%p = polyfit(kicks, meritfunction, 4);
+                p = fitQuartic(kicks, meritfunction, false);
+            else
+            	p = polyfit(kicks, meritfunction, 2);
+            end
+            f = polyval(p,transpose(vkicks));
+            if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+            	r = roots(polyder(p));
+            	r2 = r(imag(r) == 0&real(r)<max(kicks)&real(r)>min(kicks));
+            	kickMin2 = mean(r2);
+            else
+            	kickMin2 = -p(2)/(2*p(1));
+            end
+            functionMin2 = polyval(p,kickMin2);
+            %{
+            figure; plot(kicks, meritfunction, 'ko');
+            hold on;
+            plot(vkicks, f);
+            plot(vkicks, interp);
+            plot(kickMin2, functionMin2, '*')
+            plot(kickMin, functionMin, '*')
+            hold off;
+            %}
+            
             posQuadruMin2 = [];
             for j=1:6
                 if (j == 3)
                     var = posQuadru(j,:);
-                    if(strcmp(folder,'sext') && is_sextupole == true)
-                        p = polyfit(transpose(var), meritfunction, 4);
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+                        %p = polyfit(transpose(var), meritfunction, 4);
+                        p = fitQuartic(transpose(var), meritfunction, false);
                     else
                         p = polyfit(transpose(var), meritfunction, 2);
                     end
                     vVar = min(var):(max(var)-min(var))/interp_num:max(var);
                     f = polyval(p,transpose(vVar));
                     interp2 = interp1(var,meritfunction,vVar,'spline');
-                    if(strcmp(folder,'sext') && is_sextupole == true)
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
                         r = roots(polyder(p));
                         r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
                         value = mean(r2);
@@ -286,15 +317,16 @@ for m=0:0 %for m=0:length(machine)
             for j=1:6
                 if (j == 3)
                     var = posBPM(j,:);
-                    if(strcmp(folder,'sext') && is_sextupole == true)
-                        p = polyfit(transpose(var), meritfunction, 4);
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
+                        %p = polyfit(transpose(var), meritfunction, 4);
+                        p = fitQuartic(transpose(var), meritfunction, false);
                     else
                         p = polyfit(transpose(var), meritfunction, 2);
                     end
                     vVar = min(var):(max(var)-min(var))/interp_num:max(var);
                     f = polyval(p,transpose(vVar));
                     interp2 = interp1(var,meritfunction,vVar,'spline');
-                    if(strcmp(folder,'sext') && is_sextupole == true)
+                    if((strcmp(folder,'sext') || strcmp(folder,'sext2')) && is_sextupole == true)
                         r = roots(polyder(p));
                         r2 = r(imag(r) == 0&real(r)<max(var)&real(r)>min(var));
                         value = mean(r2);
@@ -356,6 +388,8 @@ for m=0:0 %for m=0:length(machine)
             BBAanalyse.interp_num = interp_num;
             BBAanalyse.kickMin = kickMin;
             BBAanalyse.functionMin = functionMin;
+            BBAanalyse.kickMin2 = kickMin2;
+            BBAanalyse.functionMin2 = functionMin2;
             BBAanalyse.posQuadruMin = posQuadruMin;
             BBAanalyse.posBPMMin = posBPMMin;
             BBAanalyse.posQuadruMin2 = posQuadruMin2;
@@ -384,6 +418,8 @@ for m=0:0 %for m=0:length(machine)
             fprintf('É Skew: %d\n', is_skew);
             fprintf('É Sextupolo: %d\n', is_sextupole);
             fprintf('ERRO BBA: (%d , %d)\n', abs(BBAanalyseX.posBPMMin(1) - ring{quadru}.T2(1)), abs(BBAanalyseX.posBPMMin(3) - ring{quadru}.T2(3)));
+            fprintf('ERRO BBA2: (%d , %d)\n', abs(BBAanalyseX.posBPMMin2(1) - ring{quadru}.T2(1)), abs(BBAanalyseX.posBPMMin2(3) - ring{quadru}.T2(3)));
+            fprintf('ERRO DistCentro2: (%d , %d)\n', abs(BBAanalyseX.posQuadruMin2(1) - ring{quadru}.T2(1)), abs(BBAanalyseX.posQuadruMin2(3) - ring{quadru}.T2(3)));
             fprintf('Tempo de Execução (s): %.2f\n', (tf-t0)*100000);
             fprintf('--------------------\n');
         end
@@ -576,7 +612,7 @@ for m=0:0 %for m=0:length(machine)
             y4X = D*y0lX - (1/8)*D*L*L*(x0lX*Kp-y0lX*K);
             x4Y = D*x0lY - (1/8)*D*L*L*(y0lY*Kp+x0lY*K);
             y4Y = D*y0lY - (1/8)*D*L*L*(x0lY*Kp-y0lY*K);
-            if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
+            if strcmp(folder,'plusK') || strcmp(folder,'plusK2') || strcmp(folder,'plusKt')
                 correcao1x{index} = [correcao1x{index}, pot*x0];
                 correcao1y{index} = [correcao1y{index}, pot*y0];
                 correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
@@ -586,7 +622,7 @@ for m=0:0 %for m=0:length(machine)
                 correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
-            if (strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == false
+            if ((strcmp(folder,'sext') || strcmp(folder,'sext2')) || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == false
                 correcao1x{index} = [correcao1x{index}, pot*x0];
                 correcao1y{index} = [correcao1y{index}, pot*y0];
                 correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
@@ -596,7 +632,7 @@ for m=0:0 %for m=0:length(machine)
                 correcao3x_Y{index} = [correcao3x_Y{index}, pot*sign(bpm-quadru)*(x2Y + x4Y)];
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
-            if (strcmp(folder,'sext') || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == true
+            if ((strcmp(folder,'sext') || strcmp(folder,'sext2')) || strcmp(folder,'sextt') || strcmp(folder,'sextder')) && is_sextupole == true
                 correcao1x{index} = [correcao1x{index}, pot*x0];
                 correcao1y{index} = [correcao1y{index}, pot*y0];
                 correcao2x{index} = [correcao2x{index}, pot*x1 + pot*x3];
@@ -607,7 +643,7 @@ for m=0:0 %for m=0:length(machine)
                 correcao3y_Y{index} = [correcao3y_Y{index}, pot*sign(bpm-quadru)*(y2Y + y4Y)];
             end
             
-            if strcmp(folder,'plusK') || strcmp(folder,'plusKt')
+            if strcmp(folder,'plusK') || strcmp(folder,'plusK2') || strcmp(folder,'plusKt')
                 Kresult = data.Kresult;
                 derivadaX = Kresult.derivadaX*pot;
                 derivadaY = Kresult.derivadaY*pot;

@@ -1,11 +1,11 @@
 caminho_arquivos = '../bba-sirius-data/';
-folder = 'sext';
+folder = 'sext2';
 
 %configuracoes do arquivo a ser carregado
-m = 0;
+m = 1;
 recursao = 0;
-range = 12;
-random_error = false;
+range = 11;
+random_error = true;
 interp_num = 1000000;
 
 %configura se usará as expressões teóricas de correção
@@ -262,6 +262,7 @@ legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
 
 %}
 
+%{
 %Cria os espaços para os gráficos na terceira figura
 if(corrigir == true)
     figure('NumberTitle', 'off', 'Name', ['Máquina ' num2str(m) '_' num2str(recursao) 'r - Gráficos Análise bbaXY Corrigido']);
@@ -316,6 +317,7 @@ legend(gr3x,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr1y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2y,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr3y,{'Quadrupolo','QS','Sextupolo + QS'});
+%}
 
 %Cria os espaços para os gráficos na terceira figura
 if(corrigir == true)
@@ -357,13 +359,14 @@ for i=1:3
     width_line = 2; 
     plot(gr1x,findsposOff(ring,listquadru{i}),desvQuadruX2{i}(1,:) - correcao1x{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2x,desvQuadruX2{i}(1,:) - correcao1x{i},desvQuadruY2{i}(3,:) - correcao1y{i},l(i,:), 'linewidth', width_line);
+    text(gr2x, desvQuadruX2{i}(1,:) - correcao1x{i},desvQuadruY2{i}(3,:) - correcao1y{i},int2str(text_bpm{i}));
     plot(gr3x,findsposOff(ring,listquadru{i}),desvBPMX2{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},[l(i,:) '-'], 'linewidth', width_line);
     
     plot(gr1y,findsposOff(ring,listquadru{i}),desvQuadruY2{i}(3,:) - correcao1y{i},[l(i,:) '-'], 'linewidth', width_line);
     plot(gr2y,desvBPMX2{i}(1,:) - correcao1x{i} - correcao2x{i} - correcao3x_X{i},desvBPMY2{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},l(i,:), 'linewidth', width_line);
     plot(gr3y,findsposOff(ring,listquadru{i}),desvBPMY2{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},[l(i,:) '-'], 'linewidth', width_line);
     %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:),int2str(text_bpm{i}));
-    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y{i},int2str(text_quadru{i}));
+    %text(findsposOff(ring,listquadru{i}),desvBPMX{i}(3,:) - correcao1y{i} - correcao2y{i} - correcao3y_Y{i},int2str(text_quadru{i}));
 end
 legend(gr1x,{'Quadrupolo','QS','Sextupolo + QS'});
 legend(gr2x,{'Quadrupolo','QS','Sextupolo + QS'});
