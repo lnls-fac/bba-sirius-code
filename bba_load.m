@@ -3,9 +3,9 @@ folder = 'sext2';
 
 %configuracoes do arquivo a ser carregado
 m = 1;
-recursao = 0;
+recursao = 3;
 range = 11;
-random_error = true;
+random_error = false;
 interp_num = 1000000;
 
 %configura se usará as expressões teóricas de correção

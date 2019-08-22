@@ -2,7 +2,7 @@ caminho_arquivos = '../bba-sirius-data/';
 folder = 'sext2';
 
 range = 11; % quantidade de valores nas corretoras
-random_error = true; % define se colocaremos erros aleatórios nos BPM's ou não
+random_error = false; % define se colocaremos erros aleatórios nos BPM's ou não
 interp_num = 1000000; % quantidade de pontos da interpolação
 
 %totalBPM = length(list_bpm);
@@ -10,7 +10,7 @@ totalBPM = length(list_bpm);
 
 
 for m=1:1 %for m=0:length(machine)
-    for recursao=0:0
+    for recursao=2:3
         %escolhe o anel e liga a cavidade de RF e a emissão de radiação
         if(m==0)
             ring = the_ring;

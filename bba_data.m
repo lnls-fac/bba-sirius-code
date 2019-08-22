@@ -8,7 +8,7 @@ folder = 'sext2';
 %3) 'sextder' é o sextupolo mas partido de força zero no sextupolo para dar
 %delta
 %4) O indice 2 no final é quando usamos regressão e não spline para kickmin
-% 1 - 16 / 5 - 14 / 10 - 12
+% 1 -> 16 / 5 -> 14 / 10 -> 12
 % 10 -> amplitude de 12 e força 10x maior para sextupolos 'sext2'
 % 11 -> amplitude de 12 e força 15x maior para sextupolos 'sext2'
 
@@ -20,8 +20,8 @@ interp_num = 1000000; % numero de pontos calculados na imperpolação
 totalBPM = length(list_bpm);
 %erro no décimo bpm
 
-for m=0:1 %for m=0:length(machine)
-    for recursao=0:0
+for m=2:2 %for m=0:length(machine)
+    for recursao=0:2
         for i=1:totalBPM %for i=1:totalBPM
             t0 = datenum(datetime('now'));
             %escolhe o anel e liga a cavidade de RF e a emissão de radiação
@@ -104,7 +104,7 @@ for m=0:1 %for m=0:length(machine)
                 if strcmp(folder,'plusK2') || strcmp(folder,'sext2')
                     if(strcmp(folder,'sext2') && is_sextupole == true)
                         %p = polyfit(kicks, meritfunction, 4);
-                        p = fitQuartic(kicks, meritfunction);
+                        p = fitQuartic(kicks, meritfunction, false);
                     else
                         p = polyfit(kicks, meritfunction, 2);
                     end
@@ -145,7 +145,7 @@ for m=0:1 %for m=0:length(machine)
                 if strcmp(folder,'plusK2') || strcmp(folder,'sext2')
                     if(strcmp(folder,'sext2') && is_sextupole == true)
                         %p = polyfit(kicks, meritfunction, 4);
-                        p = fitQuartic(kicks, meritfunction);
+                        p = fitQuartic(kicks, meritfunction, false);
                     else
                         p = polyfit(kicks, meritfunction, 2);
                     end
